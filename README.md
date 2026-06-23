@@ -1,3 +1,10 @@
+> [!WARNING]
+> **PILOT VERSION** — This is a public pilot release. The advanced production version (which has contributed to confirmed critical and high-severity bug bounty findings) is **private for security reasons** and available upon request to verified researchers, program operators, and hiring managers. See [DISCLAIMER.md](./DISCLAIMER.md) for full details.
+>
+> **For authorized security research only.** By using this toolkit you accept sole responsibility for compliance with all applicable laws. Read the [LICENSE](./LICENSE) and [DISCLAIMER](./DISCLAIMER.md) before use.
+
+---
+
 # RECON-AI Bug Bounty Kit
 **World-class autonomous security research environment for Claude Code**
 
