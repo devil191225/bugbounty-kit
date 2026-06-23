@@ -1,0 +1,14 @@
+# Source: PAT/SQL Injection/Intruder/Generic_Fuzz.txt
+
+1
+1'
+1"
+[1]
+1`
+1\
+1/*'*/
+1/*!1111'*/
+1'||'asd'||'
+1' or '1'='1
+1 or 1=1
+'or''='

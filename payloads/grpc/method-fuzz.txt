@@ -1,0 +1,52 @@
+# gRPC method name fuzz — common service/method patterns
+# Source: grpc-testing.md, disclosed reports, OWASP API4 resource consumption
+# Tier: Curated | Use with grpcurl after reflection or proto leak
+
+# --- Health / reflection (always try first) ---
+grpc.health.v1.Health/Check
+grpc.reflection.v1alpha.ServerReflection/ServerReflectionInfo
+
+# --- User / account ---
+UserService/GetUser
+UserService/GetUserById
+UserService/ListUsers
+UserService/UpdateUser
+UserService/DeleteUser
+UserService/CreateUser
+AccountService/GetAccount
+ProfileService/GetProfile
+ProfileService/UpdateProfile
+
+# --- Auth ---
+AuthService/Login
+AuthService/Register
+AuthService/RefreshToken
+AuthService/ValidateToken
+AuthService/Logout
+TokenService/IssueToken
+
+# --- Admin / internal ---
+AdminService/ListUsers
+AdminService/DeleteUser
+AdminService/Impersonate
+InternalService/Debug
+DebugService/GetConfig
+ConfigService/GetSecrets
+
+# --- Commerce / sensitive ---
+OrderService/GetOrder
+OrderService/CancelOrder
+PaymentService/Refund
+PaymentService/Charge
+BillingService/GetInvoice
+WalletService/Transfer
+
+# --- File / upload ---
+FileService/Upload
+FileService/Download
+StorageService/GetObject
+
+# --- Streaming (DoS / logic — only if in scope) ---
+ChatService/StreamMessages
+NotificationService/Subscribe
+EventService/Watch

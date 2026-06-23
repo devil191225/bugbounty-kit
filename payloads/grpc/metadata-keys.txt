@@ -1,0 +1,43 @@
+# gRPC metadata header keys + injection seeds
+# Source: grpc-testing.md, JWT/auth skills
+# Tier: Curated | grpcurl: -H "key: value"
+
+# --- Standard auth metadata ---
+authorization
+authorization-bin
+x-api-key
+x-api-token
+api-key
+apikey
+x-auth-token
+x-access-token
+x-user-id
+x-tenant-id
+x-org-id
+client-id
+client-secret
+
+# --- Bearer variants (test missing, empty, other user's token) ---
+Bearer 
+Bearer null
+Bearer undefined
+Bearer eyJhbGciOiJub25lIn0.
+
+# --- Metadata injection (CRLF in value — if gateway parses naively) ---
+authorization: Bearer token%0d%0aInjected: true
+
+# --- Internal / debug headers some backends trust ---
+x-forwarded-user
+x-forwarded-for
+x-real-ip
+x-original-url
+x-internal-request
+x-debug
+x-admin
+x-role
+x-impersonate-user
+
+# --- Service mesh / tracing (sometimes trusted) ---
+x-request-id
+x-b3-traceid
+x-envoy-internal

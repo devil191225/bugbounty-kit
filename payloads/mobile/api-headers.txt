@@ -1,0 +1,41 @@
+# Mobile-only API headers — often weaker auth or extra trust
+# Source: mobile-analysis.md, OWASP API Top 10, disclosed mobile API reports
+# Tier: Curated | Add to Burp match/replace or Intruder header list
+
+X-Device-Id
+X-Device-ID
+X-Device-UUID
+X-Installation-Id
+X-App-Version
+X-App-Build
+X-Platform
+X-OS-Version
+X-Client-Version
+X-Mobile-Client
+X-Api-Key
+X-API-KEY
+X-App-Key
+X-Client-Id
+X-Client-Secret
+X-Bundle-Id
+X-Package-Name
+X-Push-Token
+X-FCM-Token
+X-APNs-Token
+X-Attestation
+X-Integrity-Token
+X-SafetyNet
+X-Play-Integrity
+X-Jailbroken
+X-Rooted
+X-Emulator
+X-Debug
+X-Internal
+X-Staff
+X-Beta
+X-Canary
+X-Feature-Flags
+X-Override-Auth
+X-Skip-Verification
+X-Trusted-Device
+X-Mobile-Bypass

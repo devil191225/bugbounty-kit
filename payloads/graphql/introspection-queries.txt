@@ -1,0 +1,35 @@
+# GraphQL introspection queries — PAT GraphQL Injection + OWASP GraphQL Cheat Sheet
+# Use POST application/json unless noted. Authorized testing only.
+
+# --- Minimal schema type names ---
+{"query":"{ __schema { types { name } } }"}
+{"query":"{ __schema { queryType { name } mutationType { name } subscriptionType { name } } }"}
+{"query":"{ __type(name:\"Query\") { name fields { name type { name kind ofType { name kind } } } } }"}
+{"query":"{ __type(name:\"Mutation\") { name fields { name args { name type { name } } } } }"}
+{"query":"{ __type(name:\"User\") { name fields { name type { name kind ofType { name kind } } } } }"}
+
+# --- GET URL-encoded probes ---
+?query={__schema}
+?query={}
+?query={thisdefinitelydoesnotexist}
+?query={__schema{types{name}}}
+?query={__type(name:"Query"){name fields{name}}}
+
+# --- Full introspection (standard IntrospectionQuery) ---
+{"query":"query IntrospectionQuery { __schema { queryType { name } mutationType { name } subscriptionType { name } types { ...FullType } directives { name description locations args { ...InputValue } } } } fragment FullType on __Type { kind name description fields(includeDeprecated: true) { name description args { ...InputValue } type { ...TypeRef } isDeprecated deprecationReason } inputFields { ...InputValue } interfaces { ...TypeRef } enumValues(includeDeprecated: true) { name description isDeprecated deprecationReason } possibleTypes { ...TypeRef } } fragment InputValue on __InputValue { name description type { ...TypeRef } defaultValue } fragment TypeRef on __Type { kind name ofType { kind name ofType { kind name ofType { kind name ofType { kind name ofType { kind name ofType { kind name ofType { kind name } } } } } } } } }"}
+
+# --- Single-line no-fragment dump (Burp repeater friendly) ---
+{"query":"{__schema{queryType{name},mutationType{name},types{kind,name,description,fields(includeDeprecated:true){name,description,args{name,description,type{kind,name,ofType{kind,name}}},type{kind,name}}}}}"}
+
+# --- Field suggestion trigger (schema leak when introspection disabled) ---
+{"query":"{ definitelynotafield12345 { id } }"}
+{"query":"{ adminn { id } }"}
+{"query":"{ userr { id email } }"}
+{"query":"{ passsword { id } }"}
+
+# --- Directive / enum enumeration ---
+{"query":"{ __schema { directives { name locations args { name } } } }"}
+{"query":"{ __type(name:\"Role\") { enumValues { name } } }"}
+
+# --- Deprecated field discovery ---
+{"query":"{ __schema { types { name fields(includeDeprecated:true) { name isDeprecated deprecationReason } } } }"}

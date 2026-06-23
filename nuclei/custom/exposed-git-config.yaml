@@ -1,0 +1,27 @@
+id: custom-exposed-git-config
+
+info:
+  name: Exposed Git Config
+  author: bugbounty-kit
+  severity: medium
+  description: Detects publicly accessible .git/config which may leak repository metadata or credentials.
+  tags: exposure,git,misconfig
+  classification:
+    cwe-id: CWE-538
+
+http:
+  - method: GET
+    path:
+      - "{{BaseURL}}/.git/config"
+      - "{{BaseURL}}/.git/HEAD"
+
+    matchers-condition: and
+    matchers:
+      - type: word
+        words:
+          - "[core]"
+          - "repositoryformatversion"
+        condition: or
+      - type: status
+        status:
+          - 200

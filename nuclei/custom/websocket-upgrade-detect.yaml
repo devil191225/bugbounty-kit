@@ -1,0 +1,42 @@
+# WebSocket upgrade endpoint detection — info; test CSWSH + message injection
+id: custom-websocket-upgrade-detect
+
+info:
+  name: WebSocket Upgrade Endpoint
+  author: bugbounty-kit
+  severity: info
+  description: Detects HTTP Upgrade to WebSocket on common paths. Follow with Burp WS history, CSWSH Origin tests, message replay.
+  tags: websocket,realtime,api
+  reference:
+    - https://portswigger.net/web-security/websockets
+
+http:
+  - method: GET
+    path:
+      - "{{BaseURL}}/ws"
+      - "{{BaseURL}}/websocket"
+      - "{{BaseURL}}/socket"
+      - "{{BaseURL}}/socket.io/?EIO=4&transport=websocket"
+      - "{{BaseURL}}/graphql"
+      - "{{BaseURL}}/api/ws"
+      - "{{BaseURL}}/realtime"
+      - "{{BaseURL}}/notifications"
+    headers:
+      Connection: Upgrade
+      Upgrade: websocket
+      Sec-WebSocket-Version: "13"
+      Sec-WebSocket-Key: dGhlIHNhbXBsZSBub25jZQ==
+
+    matchers-condition: or
+    matchers:
+      - type: word
+        words:
+          - "101 Switching Protocols"
+        part: header
+      - type: word
+        words:
+          - "Sec-WebSocket-Accept"
+        part: header
+      - type: status
+        status:
+          - 101

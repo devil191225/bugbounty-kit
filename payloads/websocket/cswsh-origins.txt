@@ -1,0 +1,46 @@
+# CSWSH / Origin validation bypass — Origin header fuzz seeds
+# Source: PortSwigger WebSockets, CHAIN-027 bug-chains.md
+# Tier: Curated | Test during handshake only — authorized targets
+
+# --- Null / missing (Burp: delete Origin header) ---
+# (no line — remove header in Repeater)
+
+# --- Same-origin tricks ---
+null
+https://target.com
+https://www.target.com
+https://app.target.com
+https://api.target.com
+http://target.com
+https://target.com:443
+https://target.com.
+
+# --- Subdomain / sibling ---
+https://evil.target.com
+https://target.com.evil.com
+https://targetcom.evil.com
+https://nottarget.com
+
+# --- Scheme downgrade ---
+http://target.com
+ws://target.com
+wss://target.com
+
+# --- Path / port confusion ---
+https://target.com@evil.com
+https://evil.com#target.com
+https://target.com%00.evil.com
+https://target.com%09.evil.com
+https://target.com%2f%2fevil.com
+
+# --- Wildcard-like patterns some servers accept ---
+https://.target.com
+https://target.com/
+https://target.com%2f
+https://target.com%252f
+
+# --- Local / file (some misconfigs) ---
+file://
+http://127.0.0.1
+http://localhost
+https://127.0.0.1

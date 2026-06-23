@@ -1,0 +1,30 @@
+id: custom-open-redirect-param
+
+info:
+  name: Open Redirect - Common Parameter Reflection
+  author: bugbounty-kit
+  severity: low
+  description: Detects open redirect patterns via common redirect parameters. Standalone open redirect is usually N/A — chain for OAuth/token theft.
+  tags: redirect,open-redirect,misconfig
+  classification:
+    cwe-id: CWE-601
+
+http:
+  - method: GET
+    path:
+      - "{{BaseURL}}/login?next=https://evil.example.com"
+      - "{{BaseURL}}/logout?redirect=https://evil.example.com"
+      - "{{BaseURL}}/oauth/callback?redirect_uri=https://evil.example.com"
+      - "{{BaseURL}}/?url=https://evil.example.com"
+      - "{{BaseURL}}/redirect?url=https://evil.example.com"
+
+    matchers-condition: or
+    matchers:
+      - type: regex
+        part: header
+        regex:
+          - '(?i)location:\s*https?://evil\.example\.com'
+      - type: word
+        part: body
+        words:
+          - "https://evil.example.com"

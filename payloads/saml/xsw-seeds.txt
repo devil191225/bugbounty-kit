@@ -1,0 +1,35 @@
+# SAML XML Signature Wrapping (XSW) — detection seeds
+# Source: skills/saml-attacks.md, Gajek XSW research, PortSwigger SAML labs
+# Tier: Curated | Authorized testing only
+# Use on in-scope SAML ACS endpoints only — decode SAMLResponse, mutate, re-encode
+
+# --- NameID comment injection (signature covers different element than processor reads) ---
+admin<!---->@target.com
+admin<!--x-->@target.com
+victim@target.com<!---->.attacker.com
+
+# --- Duplicate Assertion / Response elements (XSW variants) ---
+# Insert second Assertion after signed block; verificator checks first, processor uses second
+
+# --- Signature stripping probes ---
+# Remove ds:Signature block entirely — does SP still accept?
+# Remove SignatureValue only — does SP still accept?
+# Change Reference URI to point at attacker-controlled element ID
+
+# --- Attribute injection (unsigned extension) ---
+# Add saml:Attribute Name="Role" after signed Assertion with Value="admin"
+
+# --- Conditions / Audience manipulation ---
+# NotBefore / NotOnOrAfter edge cases
+# AudienceRestriction mismatch between signed and processed assertion
+
+# --- ACS endpoint discovery paths ---
+/saml/acs
+/sso/saml
+/auth/saml/callback
+/saml2/assertion-consumer
+/FederationMetadata/2007-06/FederationMetadata.xml
+
+# --- Metadata exposure (info — chain for impact) ---
+/saml/metadata
+/saml/metadata.xml

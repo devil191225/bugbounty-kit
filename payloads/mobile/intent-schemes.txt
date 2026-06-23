@@ -1,0 +1,34 @@
+# Android intent scheme / exported component fuzz seeds
+# Source: OWASP MSTG, mobile-analysis.md
+# Tier: Curated | adb am start / drozer / manual
+
+# --- Common custom URL schemes ---
+target
+targetapp
+target-pay
+target-auth
+fb
+twitter
+linkedin
+spotify
+slack
+zoomus
+whatsapp
+tg
+line
+viber
+
+# --- adb intent launch templates (replace package/activity) ---
+# adb shell am start -a android.intent.action.VIEW -d "scheme://path" com.target.app
+# adb shell am start -n com.target.app/.MainActivity --es url "https://attacker.com"
+
+# --- Exported content provider paths ---
+content://com.target.app.provider/
+content://com.target.app.fileprovider/
+content://com.target.app.users/
+content://com.target.app.cache/
+
+# --- Backup / debug flags (AndroidManifest review) ---
+android:allowBackup="true"
+android:debuggable="true"
+android:exported="true"

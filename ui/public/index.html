@@ -1,0 +1,775 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>RECON-AI // Bug Bounty Dashboard</title>
+  <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg:        #0a0e17;
+      --bg2:       #0d1321;
+      --bg3:       #111927;
+      --border:    #1e2d3d;
+      --border2:   #243447;
+      --green:     #00ff88;
+      --green2:    #00c96a;
+      --green-dim: #003d22;
+      --red:       #ff4757;
+      --red-dim:   #3d0a0a;
+      --yellow:    #ffd32a;
+      --yellow-dim:#3d2e00;
+      --blue:      #4a9eff;
+      --blue-dim:  #0a1e3d;
+      --purple:    #a855f7;
+      --purple-dim:#1e0a3d;
+      --text:      #c9d1d9;
+      --text2:     #8b949e;
+      --text3:     #58687a;
+      --mono:      'JetBrains Mono', monospace;
+      --sans:      'Inter', sans-serif;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body, #root { height: 100%; background: var(--bg); color: var(--text); font-family: var(--sans); overflow: hidden; }
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: var(--bg2); }
+    ::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3px; }
+
+    /* ── Layout ── */
+    .app { display: flex; height: 100vh; }
+    .sidebar { width: 220px; min-width: 220px; background: var(--bg2); border-right: 1px solid var(--border); display: flex; flex-direction: column; }
+    .main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+    .topbar { height: 48px; background: var(--bg2); border-bottom: 1px solid var(--border); display: flex; align-items: center; padding: 0 16px; gap: 12px; flex-shrink: 0; }
+    .content { flex: 1; overflow-y: auto; padding: 20px; }
+
+    /* ── Sidebar ── */
+    .sidebar-logo { padding: 16px; border-bottom: 1px solid var(--border); }
+    .logo-title { font-family: var(--mono); font-size: 13px; font-weight: 700; color: var(--green); letter-spacing: 1px; }
+    .logo-sub { font-size: 10px; color: var(--text3); margin-top: 2px; font-family: var(--mono); }
+    .sidebar-section { padding: 12px 8px 4px; }
+    .sidebar-label { font-size: 10px; color: var(--text3); font-weight: 600; letter-spacing: 1.5px; text-transform: uppercase; padding: 0 8px; }
+    .nav-item { display: flex; align-items: center; gap: 10px; padding: 8px 12px; border-radius: 6px; cursor: pointer; font-size: 13px; color: var(--text2); transition: all 0.15s; margin: 1px 0; user-select: none; }
+    .nav-item:hover { background: var(--bg3); color: var(--text); }
+    .nav-item.active { background: var(--green-dim); color: var(--green); }
+    .nav-icon { width: 16px; text-align: center; font-size: 14px; }
+    .sidebar-bottom { margin-top: auto; padding: 12px; border-top: 1px solid var(--border); }
+    .status-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; margin-right: 6px; }
+    .dot-green { background: var(--green); box-shadow: 0 0 6px var(--green); }
+    .dot-red { background: var(--red); }
+    .dot-yellow { background: var(--yellow); box-shadow: 0 0 6px var(--yellow); }
+    .dot-dim { background: var(--text3); }
+    .ws-status { font-size: 11px; font-family: var(--mono); color: var(--text3); display: flex; align-items: center; }
+
+    /* ── Topbar ── */
+    .target-badge { background: var(--bg3); border: 1px solid var(--border2); border-radius: 6px; padding: 4px 10px; font-family: var(--mono); font-size: 12px; color: var(--green); }
+    .phase-badge { background: var(--blue-dim); border: 1px solid var(--blue); border-radius: 4px; padding: 3px 8px; font-size: 10px; font-family: var(--mono); color: var(--blue); text-transform: uppercase; letter-spacing: 0.5px; }
+    .topbar-right { margin-left: auto; display: flex; gap: 8px; align-items: center; }
+
+    /* ── Cards ── */
+    .card { background: var(--bg2); border: 1px solid var(--border); border-radius: 8px; padding: 16px; }
+    .card-header { font-size: 11px; color: var(--text3); font-weight: 600; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
+    .card-title { font-size: 14px; font-weight: 600; color: var(--text); }
+
+    /* ── Grid ── */
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; }
+    .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+
+    /* ── Stat cards ── */
+    .stat-card { background: var(--bg2); border: 1px solid var(--border); border-radius: 8px; padding: 16px; }
+    .stat-value { font-size: 28px; font-weight: 700; font-family: var(--mono); }
+    .stat-label { font-size: 11px; color: var(--text3); margin-top: 4px; text-transform: uppercase; letter-spacing: 0.5px; }
+    .stat-green { color: var(--green); }
+    .stat-red { color: var(--red); }
+    .stat-yellow { color: var(--yellow); }
+    .stat-blue { color: var(--blue); }
+
+    /* ── Phase buttons ── */
+    .phase-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+    .phase-btn { background: var(--bg3); border: 1px solid var(--border2); border-radius: 8px; padding: 14px 12px; cursor: pointer; transition: all 0.15s; text-align: left; display: flex; flex-direction: column; gap: 6px; position: relative; overflow: hidden; }
+    .phase-btn:hover { border-color: var(--green); background: var(--green-dim); }
+    .phase-btn:hover .phase-btn-name { color: var(--green); }
+    .phase-btn.running { border-color: var(--yellow); background: var(--yellow-dim); animation: pulse-border 1.5s infinite; }
+    .phase-btn.running .phase-btn-name { color: var(--yellow); }
+    @keyframes pulse-border { 0%,100%{opacity:1} 50%{opacity:0.6} }
+    .phase-btn-icon { font-size: 20px; }
+    .phase-btn-name { font-family: var(--mono); font-size: 12px; font-weight: 600; color: var(--text); }
+    .phase-btn-desc { font-size: 11px; color: var(--text3); line-height: 1.4; }
+    .phase-btn-badge { position: absolute; top: 8px; right: 8px; font-size: 9px; padding: 2px 6px; border-radius: 3px; font-family: var(--mono); font-weight: 600; }
+    .badge-auto { background: var(--green-dim); color: var(--green); border: 1px solid var(--green2); }
+    .badge-confirm { background: var(--yellow-dim); color: var(--yellow); border: 1px solid var(--yellow); }
+
+    /* ── Terminal ── */
+    .terminal { background: #060a0f; border: 1px solid var(--border); border-radius: 8px; font-family: var(--mono); font-size: 12px; line-height: 1.6; overflow: hidden; }
+    .terminal-header { background: var(--bg3); border-bottom: 1px solid var(--border); padding: 8px 14px; display: flex; align-items: center; gap: 8px; }
+    .term-dot { width: 10px; height: 10px; border-radius: 50%; }
+    .term-red { background: #ff5f56; }
+    .term-yellow { background: #ffbd2e; }
+    .term-green { background: #27c93f; }
+    .terminal-title { font-size: 11px; color: var(--text3); margin-left: 4px; }
+    .terminal-body { padding: 12px 16px; height: 380px; overflow-y: auto; word-break: break-all; }
+    .term-line { margin-bottom: 2px; }
+    .term-stdout { color: #d1d5db; }
+    .term-stderr { color: #f87171; }
+    .term-info { color: var(--blue); }
+    .term-success { color: var(--green); }
+    .term-prompt { color: var(--green); }
+    .term-cmd { color: var(--yellow); }
+
+    /* ── Findings board ── */
+    .kanban { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; }
+    .kanban-col { background: var(--bg2); border: 1px solid var(--border); border-radius: 8px; min-height: 200px; }
+    .kanban-header { padding: 10px 12px; border-bottom: 1px solid var(--border); font-size: 11px; font-weight: 600; letter-spacing: 0.5px; text-transform: uppercase; display: flex; justify-content: space-between; align-items: center; }
+    .kanban-body { padding: 10px; display: flex; flex-direction: column; gap: 8px; }
+    .finding-card { background: var(--bg3); border: 1px solid var(--border2); border-radius: 6px; padding: 10px; cursor: pointer; transition: border-color 0.15s; }
+    .finding-card:hover { border-color: var(--blue); }
+    .finding-id { font-family: var(--mono); font-size: 10px; color: var(--text3); }
+    .finding-title { font-size: 12px; font-weight: 500; margin: 4px 0; }
+    .finding-target { font-family: var(--mono); font-size: 10px; color: var(--text3); }
+    .sev-badge { display: inline-block; padding: 2px 6px; border-radius: 3px; font-size: 9px; font-weight: 700; font-family: var(--mono); letter-spacing: 0.5px; }
+    .sev-critical { background: #3d0a2e; color: #ff4a9e; border: 1px solid #ff4a9e; }
+    .sev-high { background: var(--red-dim); color: var(--red); border: 1px solid var(--red); }
+    .sev-medium { background: var(--yellow-dim); color: var(--yellow); border: 1px solid var(--yellow); }
+    .sev-low { background: var(--blue-dim); color: var(--blue); border: 1px solid var(--blue); }
+    .sev-info { background: var(--bg3); color: var(--text3); border: 1px solid var(--border2); }
+    .col-potential { border-top: 2px solid var(--text3); }
+    .col-confirmed { border-top: 2px solid var(--yellow); }
+    .col-reported  { border-top: 2px solid var(--blue); }
+    .col-triaged   { border-top: 2px solid var(--purple); }
+    .col-bounty    { border-top: 2px solid var(--green); }
+
+    /* ── Scope editor ── */
+    .scope-textarea { width: 100%; background: #060a0f; border: 1px solid var(--border2); border-radius: 6px; padding: 12px; font-family: var(--mono); font-size: 12px; color: var(--text); resize: vertical; min-height: 420px; line-height: 1.6; outline: none; }
+    .scope-textarea:focus { border-color: var(--green); }
+
+    /* ── Tool status ── */
+    .tool-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; }
+    .tool-item { background: var(--bg3); border: 1px solid var(--border); border-radius: 6px; padding: 10px 8px; display: flex; align-items: center; gap: 8px; font-family: var(--mono); font-size: 12px; }
+    .tool-installed { border-color: var(--green-dim); color: var(--text); }
+    .tool-missing { border-color: var(--red-dim); color: var(--text3); }
+
+    /* ── Buttons ── */
+    .btn { padding: 7px 14px; border-radius: 6px; font-size: 13px; font-weight: 500; cursor: pointer; border: 1px solid transparent; transition: all 0.15s; display: inline-flex; align-items: center; gap: 6px; font-family: var(--sans); }
+    .btn-primary { background: var(--green); color: #000; border-color: var(--green); font-weight: 600; }
+    .btn-primary:hover { background: var(--green2); }
+    .btn-ghost { background: transparent; color: var(--text2); border-color: var(--border2); }
+    .btn-ghost:hover { background: var(--bg3); color: var(--text); border-color: var(--border); }
+    .btn-danger { background: var(--red-dim); color: var(--red); border-color: var(--red); }
+    .btn-danger:hover { background: var(--red); color: #fff; }
+    .btn-sm { padding: 4px 10px; font-size: 11px; }
+    .btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+    /* ── Custom prompt ── */
+    .cmd-input { width: 100%; background: #060a0f; border: 1px solid var(--border2); border-radius: 6px; padding: 10px 14px; font-family: var(--mono); font-size: 13px; color: var(--green); outline: none; }
+    .cmd-input:focus { border-color: var(--green); }
+    .cmd-input::placeholder { color: var(--text3); }
+
+    /* ── Modals / overlays ── */
+    .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.7); display: flex; align-items: center; justify-content: center; z-index: 100; backdrop-filter: blur(4px); }
+    .modal { background: var(--bg2); border: 1px solid var(--border2); border-radius: 10px; padding: 24px; width: 600px; max-height: 80vh; overflow-y: auto; }
+    .modal-title { font-size: 15px; font-weight: 600; margin-bottom: 16px; }
+    .modal pre { background: #060a0f; border: 1px solid var(--border); border-radius: 6px; padding: 14px; font-family: var(--mono); font-size: 11px; overflow-x: auto; white-space: pre-wrap; line-height: 1.5; }
+
+    /* ── Misc ── */
+    .section-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+    .section-title { font-size: 15px; font-weight: 600; }
+    .empty-state { text-align: center; padding: 40px; color: var(--text3); font-size: 13px; }
+    .empty-icon { font-size: 32px; margin-bottom: 8px; }
+    .progress-bar { height: 4px; background: var(--border); border-radius: 2px; overflow: hidden; }
+    .progress-fill { height: 100%; background: var(--green); border-radius: 2px; transition: width 0.3s; }
+    .tag { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 11px; background: var(--bg3); border: 1px solid var(--border); color: var(--text2); font-family: var(--mono); }
+    .divider { border: none; border-top: 1px solid var(--border); margin: 16px 0; }
+    .mb-4 { margin-bottom: 16px; }
+    .mb-3 { margin-bottom: 12px; }
+    .mb-2 { margin-bottom: 8px; }
+    .mt-3 { margin-top: 12px; }
+    .flex { display: flex; }
+    .items-center { align-items: center; }
+    .gap-2 { gap: 8px; }
+    .gap-3 { gap: 12px; }
+    .ml-auto { margin-left: auto; }
+    .text-sm { font-size: 13px; }
+    .text-xs { font-size: 11px; }
+    .text-mono { font-family: var(--mono); }
+    .text-green { color: var(--green); }
+    .text-red { color: var(--red); }
+    .text-yellow { color: var(--yellow); }
+    .text-blue { color: var(--blue); }
+    .text-dim { color: var(--text3); }
+
+    /* ── Animations ── */
+    @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
+    .cursor-blink { animation: blink 1s step-end infinite; }
+    @keyframes fadeIn { from{opacity:0;transform:translateY(4px)} to{opacity:1;transform:translateY(0)} }
+    .fade-in { animation: fadeIn 0.2s ease; }
+  </style>
+</head>
+<body>
+<div id="root"></div>
+
+<script type="text/babel">
+const { useState, useEffect, useRef, useCallback } = React;
+
+// ── WebSocket hook ────────────────────────────────────────────────────────────
+function useWS(onMessage) {
+  const [connected, setConnected] = useState(false);
+  const wsRef = useRef(null);
+
+  useEffect(() => {
+    const connect = () => {
+      const ws = new WebSocket(`ws://${location.host}`);
+      wsRef.current = ws;
+      ws.onopen = () => setConnected(true);
+      ws.onclose = () => { setConnected(false); setTimeout(connect, 2000); };
+      ws.onmessage = (e) => { try { onMessage(JSON.parse(e.data)); } catch {} };
+    };
+    connect();
+    return () => wsRef.current?.close();
+  }, []);
+
+  return connected;
+}
+
+// ── API helpers ───────────────────────────────────────────────────────────────
+const api = {
+  get: (path) => fetch(path).then(r => r.json()),
+  post: (path, body) => fetch(path, { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify(body) }).then(r => r.json()),
+};
+
+// ── Severity badge ────────────────────────────────────────────────────────────
+function SevBadge({ sev }) {
+  const s = (sev||'').toUpperCase();
+  const cls = s === 'CRITICAL' ? 'sev-critical' : s === 'HIGH' ? 'sev-high' : s === 'MEDIUM' ? 'sev-medium' : s === 'LOW' ? 'sev-low' : 'sev-info';
+  return <span className={`sev-badge ${cls}`}>{s || 'INFO'}</span>;
+}
+
+// ── Terminal view ─────────────────────────────────────────────────────────────
+function Terminal({ lines, title = 'LIVE OUTPUT', height = 380 }) {
+  const bodyRef = useRef(null);
+  useEffect(() => {
+    if (bodyRef.current) bodyRef.current.scrollTop = bodyRef.current.scrollHeight;
+  }, [lines]);
+
+  return (
+    <div className="terminal">
+      <div className="terminal-header">
+        <div className="term-dot term-red" />
+        <div className="term-dot term-yellow" />
+        <div className="term-dot term-green" />
+        <span className="terminal-title text-mono">{title}</span>
+      </div>
+      <div className="terminal-body" ref={bodyRef} style={{height}}>
+        {lines.length === 0 && (
+          <div className="text-dim text-xs text-mono">// waiting for output<span className="cursor-blink">_</span></div>
+        )}
+        {lines.map((l, i) => (
+          <div key={i} className={`term-line term-${l.type || 'stdout'}`}>
+            {l.type === 'prompt' && <span className="text-green">❯ </span>}
+            {l.text}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// ── Phase control panel ───────────────────────────────────────────────────────
+function PhasePanel({ running, onRun, termLines }) {
+  const [custom, setCustom] = useState('');
+  const [customPhase, setCustomPhase] = useState('custom');
+
+  const phases = [
+    { id: 'passive-recon', icon: '🔍', name: 'Passive Recon', desc: 'Certs, Shodan, GitHub, Wayback', badge: 'AUTO' },
+    { id: 'active-recon',  icon: '📡', name: 'Active Recon',  desc: 'Subfinder, httpx, naabu', badge: 'AUTO' },
+    { id: 'surface-map',   icon: '🗺️', name: 'Surface Map',   desc: 'Katana crawl, JS analysis, gau', badge: 'AUTO' },
+    { id: 'vuln-hunt',     icon: '⚔️', name: 'Vuln Hunt',     desc: 'Nuclei, IDOR, XSS, SQLi, auth', badge: 'AUTO' },
+    { id: 'chain-analysis',icon: '🔗', name: 'Chain Analysis',desc: 'Combine findings for higher impact', badge: 'AUTO' },
+    { id: 'report',        icon: '📝', name: 'Write Reports',  desc: 'HackerOne-format disclosures', badge: 'AUTO' },
+  ];
+
+  return (
+    <div>
+      <div className="phase-grid mb-4">
+        {phases.map(p => (
+          <div
+            key={p.id}
+            className={`phase-btn ${running === p.id ? 'running' : ''}`}
+            onClick={() => onRun(p.id)}
+          >
+            <span className={`phase-btn-badge ${p.badge === 'AUTO' ? 'badge-auto' : 'badge-confirm'}`}>{p.badge}</span>
+            <div className="phase-btn-icon">{p.icon}</div>
+            <div className="phase-btn-name">{p.name}</div>
+            <div className="phase-btn-desc">{p.desc}</div>
+          </div>
+        ))}
+      </div>
+
+      <div className="card mb-4">
+        <div className="card-header">⚡ Custom Prompt</div>
+        <div className="flex gap-2">
+          <input
+            className="cmd-input"
+            placeholder='e.g. "Investigate the /api/v2/users endpoint for IDOR"'
+            value={custom}
+            onChange={e => setCustom(e.target.value)}
+            onKeyDown={e => e.key === 'Enter' && custom && (onRun('custom', custom), setCustom(''))}
+          />
+          <button className="btn btn-primary" onClick={() => { if(custom) { onRun('custom', custom); setCustom(''); } }}>
+            Run
+          </button>
+        </div>
+      </div>
+
+      <Terminal lines={termLines} title="CLAUDE OUTPUT" height={320} />
+    </div>
+  );
+}
+
+// ── Findings kanban ───────────────────────────────────────────────────────────
+function FindingsBoard({ findings }) {
+  const [selected, setSelected] = useState(null);
+  const statuses = ['POTENTIAL','CONFIRMED','REPORTED','TRIAGED','BOUNTY'];
+  const colColors = { POTENTIAL:'text-dim', CONFIRMED:'text-yellow', REPORTED:'text-blue', TRIAGED:'text-purple', BOUNTY:'text-green' };
+
+  const byStatus = {};
+  statuses.forEach(s => { byStatus[s] = findings.filter(f => (f.status||'').toUpperCase() === s); });
+
+  return (
+    <div>
+      {findings.length === 0 && (
+        <div className="empty-state">
+          <div className="empty-icon">🎯</div>
+          <div>No findings yet — run a phase to start hunting</div>
+        </div>
+      )}
+      <div className="kanban">
+        {statuses.map(status => (
+          <div key={status} className={`kanban-col col-${status.toLowerCase()}`}>
+            <div className="kanban-header">
+              <span className={`text-xs ${colColors[status]}`}>{status}</span>
+              <span className="tag">{byStatus[status].length}</span>
+            </div>
+            <div className="kanban-body">
+              {byStatus[status].map(f => (
+                <div key={f.id} className="finding-card fade-in" onClick={() => setSelected(f)}>
+                  <div className="finding-id">{f.id}</div>
+                  <div className="finding-title">{f.title || '(untitled)'}</div>
+                  <div className="flex items-center gap-2 mt-3">
+                    <SevBadge sev={f.severity} />
+                    <span className="finding-target">{f.target}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {selected && (
+        <div className="modal-overlay" onClick={() => setSelected(null)}>
+          <div className="modal" onClick={e => e.stopPropagation()}>
+            <div className="flex items-center gap-3 mb-4">
+              <span className="text-mono text-xs text-dim">{selected.id}</span>
+              <SevBadge sev={selected.severity} />
+              <span className="tag">{selected.status}</span>
+              <button className="btn btn-ghost btn-sm ml-auto" onClick={() => setSelected(null)}>✕ Close</button>
+            </div>
+            <div className="modal-title">{selected.title}</div>
+            <div className="text-sm text-dim mb-3">Target: <span className="text-mono text-blue">{selected.target}</span></div>
+            {selected.cvss && <div className="text-xs text-dim mb-3">CVSS: <span className="text-yellow">{selected.cvss}</span></div>}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ── Scope editor ──────────────────────────────────────────────────────────────
+function ScopeEditor({ raw, onSave }) {
+  const [content, setContent] = useState(raw || '');
+  const [saved, setSaved] = useState(false);
+
+  const save = async () => {
+    await api.post('/api/scope', { content });
+    setSaved(true);
+    setTimeout(() => setSaved(false), 2000);
+    onSave();
+  };
+
+  return (
+    <div>
+      <div className="section-header">
+        <div>
+          <div className="section-title">Scope Configuration</div>
+          <div className="text-xs text-dim mt-3">Edit SCOPE.md — the pre-tool hook enforces this before every command</div>
+        </div>
+        <button className={`btn ${saved ? 'btn-ghost' : 'btn-primary'}`} onClick={save}>
+          {saved ? '✓ Saved' : '💾 Save Scope'}
+        </button>
+      </div>
+      <textarea
+        className="scope-textarea"
+        value={content}
+        onChange={e => setContent(e.target.value)}
+        spellCheck={false}
+      />
+    </div>
+  );
+}
+
+// ── Tool status ───────────────────────────────────────────────────────────────
+function ToolStatus({ tools, onInstall, termLines }) {
+  const installed = Object.values(tools).filter(v => v === 'installed').length;
+  const total = Object.keys(tools).length;
+
+  return (
+    <div>
+      <div className="section-header">
+        <div>
+          <div className="section-title">Tool Status</div>
+          <div className="text-xs text-dim mt-3">{installed}/{total} core tools installed</div>
+        </div>
+        <button className="btn btn-primary" onClick={onInstall}>⚡ Run Installer</button>
+      </div>
+
+      <div className="progress-bar mb-4">
+        <div className="progress-fill" style={{width: `${(installed/total)*100}%`}} />
+      </div>
+
+      <div className="tool-grid mb-4">
+        {Object.entries(tools).map(([name, status]) => (
+          <div key={name} className={`tool-item ${status === 'installed' ? 'tool-installed' : 'tool-missing'}`}>
+            <span>{status === 'installed' ? '✓' : '✗'}</span>
+            <span style={{color: status === 'installed' ? 'var(--green)' : 'var(--red)'}}>{name}</span>
+          </div>
+        ))}
+      </div>
+
+      <Terminal lines={termLines} title="INSTALLER OUTPUT" height={300} />
+    </div>
+  );
+}
+
+// ── Reports viewer ────────────────────────────────────────────────────────────
+function Reports({ reports }) {
+  const [selected, setSelected] = useState(null);
+
+  return (
+    <div>
+      <div className="section-header">
+        <div className="section-title">Reports ({reports.length})</div>
+      </div>
+      {reports.length === 0 && (
+        <div className="empty-state">
+          <div className="empty-icon">📄</div>
+          <div>No reports yet — confirmed findings will appear here</div>
+        </div>
+      )}
+      <div className="grid-2">
+        {reports.map(r => (
+          <div key={r.filename} className="card" style={{cursor:'pointer'}} onClick={() => setSelected(r)}>
+            <div className="flex items-center gap-2">
+              <span>📄</span>
+              <span className="text-sm text-mono">{r.filename}</span>
+              <span className="text-xs text-dim ml-auto">{r.modified ? new Date(r.modified).toLocaleDateString() : ''}</span>
+            </div>
+            <div className="text-xs text-dim mt-3" style={{overflow:'hidden',height:'3em',display:'-webkit-box',WebkitLineClamp:2,WebkitBoxOrient:'vertical'}}>
+              {r.content.slice(0, 150)}
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {selected && (
+        <div className="modal-overlay" onClick={() => setSelected(null)}>
+          <div className="modal" onClick={e => e.stopPropagation()} style={{width:'800px'}}>
+            <div className="flex items-center gap-2 mb-4">
+              <span className="text-mono text-sm">{selected.filename}</span>
+              <button className="btn btn-ghost btn-sm ml-auto" onClick={() => setSelected(null)}>✕</button>
+            </div>
+            <pre>{selected.content}</pre>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ── Dashboard ─────────────────────────────────────────────────────────────────
+function Dashboard({ session, scope, tools }) {
+  const phases = ['passive-recon','active-recon','surface-map','vuln-hunt','chain-analysis','report'];
+  const currentPhaseIdx = phases.indexOf(session.phase);
+  const sevCounts = { CRITICAL:0, HIGH:0, MEDIUM:0, LOW:0 };
+  (session.findings || []).forEach(f => { const s = (f.severity||'').toUpperCase(); if(sevCounts[s]!==undefined) sevCounts[s]++; });
+  const confirmed = (session.findings||[]).filter(f => ['CONFIRMED','REPORTED','TRIAGED','BOUNTY'].includes((f.status||'').toUpperCase())).length;
+
+  return (
+    <div>
+      {/* Stats row */}
+      <div className="grid-4 mb-4">
+        <div className="stat-card">
+          <div className="stat-value stat-red">{sevCounts.CRITICAL + sevCounts.HIGH}</div>
+          <div className="stat-label">Critical/High</div>
+        </div>
+        <div className="stat-card">
+          <div className="stat-value stat-yellow">{sevCounts.MEDIUM}</div>
+          <div className="stat-label">Medium</div>
+        </div>
+        <div className="stat-card">
+          <div className="stat-value stat-green">{confirmed}</div>
+          <div className="stat-label">Confirmed</div>
+        </div>
+        <div className="stat-card">
+          <div className="stat-value stat-blue">{(session.findings||[]).length}</div>
+          <div className="stat-label">Total Findings</div>
+        </div>
+      </div>
+
+      <div className="grid-2 mb-4">
+        {/* Session state */}
+        <div className="card">
+          <div className="card-header">📋 Session State</div>
+          {[
+            ['Target', session.target || '—'],
+            ['Phase', session.phase || '—'],
+            ['Session ID', session.sessionId || '—'],
+            ['Last Updated', session.lastUpdated || '—'],
+          ].map(([k,v]) => (
+            <div key={k} className="flex mb-2">
+              <span className="text-xs text-dim" style={{minWidth:100}}>{k}</span>
+              <span className="text-xs text-mono">{v}</span>
+            </div>
+          ))}
+        </div>
+
+        {/* Program info */}
+        <div className="card">
+          <div className="card-header">🎯 Program</div>
+          {[
+            ['Program', scope.programName || '—'],
+            ['Platform', scope.platform || '—'],
+            ['Max Sev', scope.maxSeverity || '—'],
+          ].map(([k,v]) => (
+            <div key={k} className="flex mb-2">
+              <span className="text-xs text-dim" style={{minWidth:100}}>{k}</span>
+              <span className="text-xs text-mono">{v}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Phase progress */}
+      <div className="card mb-4">
+        <div className="card-header">⚡ Recon Pipeline</div>
+        <div style={{display:'flex',gap:4}}>
+          {phases.map((p, i) => (
+            <div key={p} style={{flex:1,textAlign:'center'}}>
+              <div style={{
+                height: 6, borderRadius: 3,
+                background: i < currentPhaseIdx ? 'var(--green)' : i === currentPhaseIdx ? 'var(--yellow)' : 'var(--border)',
+                transition: 'background 0.3s',
+              }} />
+              <div style={{fontSize:9,marginTop:4,color: i <= currentPhaseIdx ? 'var(--text2)' : 'var(--text3)', fontFamily:'var(--mono)'}}>
+                {p.replace('-',' ').toUpperCase()}
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Next steps */}
+      {session.nextSteps?.length > 0 && (
+        <div className="card">
+          <div className="card-header">📌 Next Steps</div>
+          {session.nextSteps.map((s,i) => (
+            <div key={i} className="flex items-center gap-2 mb-2">
+              <span className="text-green text-xs">{i+1}.</span>
+              <span className="text-sm text-mono">{s}</span>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ── Root App ──────────────────────────────────────────────────────────────────
+function App() {
+  const [tab, setTab] = useState('dashboard');
+  const [state, setState] = useState({ session:{findings:[]}, scope:{}, reports:[], toolStatus:{} });
+  const [termLines, setTermLines] = useState([]);
+  const [installLines, setInstallLines] = useState([]);
+  const [running, setRunning] = useState(null);
+  const [runningCmdId, setRunningCmdId] = useState(null);
+
+  const addLine = useCallback((lines, setLines, text, type='stdout') => {
+    setLines(prev => [...prev.slice(-500), { text, type }]);
+  }, []);
+
+  const wsConnected = useWS(useCallback((msg) => {
+    switch(msg.type) {
+      case 'state':
+        setState(s => ({...s, ...msg.data}));
+        break;
+      case 'file_changed':
+        // Refresh state when kit files change
+        api.get('/api/state').then(setState);
+        break;
+      case 'proc_start':
+        addLine(termLines, setTermLines, `[starting ${msg.data.cmdId}]`, 'info');
+        break;
+      case 'proc_stdout':
+        if (msg.data.cmdId?.startsWith('install')) {
+          addLine(installLines, setInstallLines, msg.data.data.trimEnd(), 'stdout');
+        } else {
+          addLine(termLines, setTermLines, msg.data.data.trimEnd(), 'stdout');
+        }
+        break;
+      case 'proc_stderr':
+        if (msg.data.cmdId?.startsWith('install')) {
+          addLine(installLines, setInstallLines, msg.data.data.trimEnd(), 'stderr');
+        } else {
+          addLine(termLines, setTermLines, msg.data.data.trimEnd(), 'stderr');
+        }
+        break;
+      case 'proc_done':
+        setRunning(null);
+        setRunningCmdId(null);
+        addLine(termLines, setTermLines, `[process exited with code ${msg.data.code}]`, msg.data.code === 0 ? 'success' : 'stderr');
+        // Refresh state after process completes
+        api.get('/api/state').then(setState);
+        break;
+    }
+  }, [addLine]));
+
+  useEffect(() => {
+    api.get('/api/state').then(setState);
+  }, []);
+
+  const runPhase = async (phaseId, extra) => {
+    setRunning(phaseId);
+    setTab('run');
+    addLine(termLines, setTermLines, `> Running phase: ${phaseId}`, 'prompt');
+    const res = await api.post('/api/run/phase', { phase: phaseId, extra });
+    setRunningCmdId(res.cmdId);
+  };
+
+  const runInstall = async () => {
+    setTab('tools');
+    addLine(installLines, setInstallLines, '> Starting tool installer...', 'prompt');
+    api.post('/api/install', {});
+  };
+
+  const stopRunning = async () => {
+    if (runningCmdId) await api.post(`/api/run/kill/${runningCmdId}`, {});
+    setRunning(null);
+  };
+
+  const nav = [
+    { id: 'dashboard', icon: '⬡', label: 'Dashboard' },
+    { id: 'run',       icon: '⚡', label: 'Run Phases' },
+    { id: 'findings',  icon: '🎯', label: 'Findings' },
+    { id: 'reports',   icon: '📄', label: 'Reports' },
+    { id: 'scope',     icon: '🔭', label: 'Scope' },
+    { id: 'tools',     icon: '🛠', label: 'Tools' },
+  ];
+
+  return (
+    <div className="app">
+      {/* Sidebar */}
+      <div className="sidebar">
+        <div className="sidebar-logo">
+          <div className="logo-title">RECON-AI</div>
+          <div className="logo-sub">Bug Bounty Dashboard v1.0</div>
+        </div>
+
+        <div className="sidebar-section">
+          <div className="sidebar-label">Navigation</div>
+          {nav.map(n => (
+            <div key={n.id} className={`nav-item ${tab === n.id ? 'active' : ''}`} onClick={() => setTab(n.id)}>
+              <span className="nav-icon">{n.icon}</span>
+              <span>{n.label}</span>
+              {n.id === 'findings' && state.session.findings?.length > 0 && (
+                <span className="tag btn-sm ml-auto">{state.session.findings.length}</span>
+              )}
+              {n.id === 'reports' && state.reports?.length > 0 && (
+                <span className="tag btn-sm ml-auto">{state.reports.length}</span>
+              )}
+            </div>
+          ))}
+        </div>
+
+        <div className="sidebar-bottom">
+          <div className="ws-status">
+            <span className={`status-dot ${wsConnected ? 'dot-green' : 'dot-red'}`} />
+            {wsConnected ? 'Connected' : 'Reconnecting...'}
+          </div>
+          {running && (
+            <div style={{marginTop:8}}>
+              <div className="text-xs text-yellow" style={{marginBottom:6}}>
+                ● Running: {running}
+              </div>
+              <button className="btn btn-danger btn-sm" style={{width:'100%'}} onClick={stopRunning}>
+                ■ Stop
+              </button>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Main */}
+      <div className="main">
+        {/* Topbar */}
+        <div className="topbar">
+          {state.scope.programName
+            ? <div className="target-badge">🎯 {state.scope.programName}</div>
+            : <div className="target-badge" style={{color:'var(--text3)'}}>No target — edit Scope</div>
+          }
+          {state.session.phase && <div className="phase-badge">{state.session.phase}</div>}
+          <div className="topbar-right">
+            {running && <span className="text-xs text-yellow" style={{fontFamily:'var(--mono)'}}>● {running}</span>}
+            <span className="text-xs text-dim text-mono">{new Date().toLocaleTimeString()}</span>
+          </div>
+        </div>
+
+        {/* Content */}
+        <div className="content">
+          {tab === 'dashboard' && (
+            <Dashboard session={state.session} scope={state.scope} tools={state.toolStatus} />
+          )}
+          {tab === 'run' && (
+            <PhasePanel running={running} onRun={runPhase} termLines={termLines} />
+          )}
+          {tab === 'findings' && (
+            <FindingsBoard findings={state.session.findings || []} />
+          )}
+          {tab === 'reports' && (
+            <Reports reports={state.reports || []} />
+          )}
+          {tab === 'scope' && (
+            <ScopeEditor
+              raw={state.scope.raw}
+              onSave={() => api.get('/api/state').then(setState)}
+            />
+          )}
+          {tab === 'tools' && (
+            <ToolStatus
+              tools={state.toolStatus || {}}
+              onInstall={runInstall}
+              termLines={installLines}
+            />
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+</script>
+</body>
+</html>

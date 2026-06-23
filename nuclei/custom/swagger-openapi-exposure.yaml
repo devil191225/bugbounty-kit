@@ -1,0 +1,37 @@
+# OpenAPI/Swagger exposure — info/medium; maps API for mass-assignment + BOLA
+id: custom-swagger-openapi-exposure
+
+info:
+  name: OpenAPI Swagger Spec Exposed
+  author: bugbounty-kit
+  severity: low
+  description: Exposed API documentation reveals endpoints, parameters, and hidden admin routes. Chain with BOLA/mass assignment testing.
+  tags: api,swagger,openapi,misconfig,exposure
+  reference:
+    - https://owasp.org/API-Security/editions/2023/en/0xa9-improper-inventory-management/
+
+http:
+  - method: GET
+    path:
+      - "{{BaseURL}}/swagger.json"
+      - "{{BaseURL}}/swagger/v1/swagger.json"
+      - "{{BaseURL}}/openapi.json"
+      - "{{BaseURL}}/api/swagger.json"
+      - "{{BaseURL}}/api/openapi.json"
+      - "{{BaseURL}}/v2/api-docs"
+      - "{{BaseURL}}/v3/api-docs"
+      - "{{BaseURL}}/api-docs"
+      - "{{BaseURL}}/docs/openapi.json"
+      - "{{BaseURL}}/.well-known/openapi.json"
+
+    matchers-condition: and
+    matchers:
+      - type: word
+        words:
+          - '"paths"'
+          - '"swagger"'
+          - '"openapi"'
+        condition: or
+      - type: status
+        status:
+          - 200

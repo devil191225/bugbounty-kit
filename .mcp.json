@@ -1,0 +1,38 @@
+{
+  "mcpServers": {
+    "hackerone": {
+      "command": "python",
+      "args": ["C:\\Users\\ask92\\Downloads\\bugbounty-kit\\scripts\\hackerone_mcp.py"],
+      "env": {
+        "H1_USERNAME": "${H1_USERNAME}",
+        "H1_API_TOKEN": "${H1_API_TOKEN}"
+      }
+    },
+    "filesystem": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-filesystem",
+        "C:\\Users\\ask92\\Downloads\\bugbounty-kit"
+      ]
+    },
+    "fetch": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-fetch"]
+    },
+    "git": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-git"],
+      "env": {
+        "GITHUB_TOKEN": "${GITHUB_TOKEN}"
+      }
+    },
+    "brave-search": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-brave-search"],
+      "env": {
+        "BRAVE_API_KEY": "${BRAVE_API_KEY}"
+      }
+    }
+  }
+}

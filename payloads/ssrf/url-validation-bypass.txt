@@ -1,0 +1,94 @@
+# URL Validation Bypass — SSRF / Open Redirect / CORS Origin
+# Source: PortSwigger URL Validation Bypass Cheat Sheet (2024), PayloadsAllTheThings/SSRF
+
+# --- Loopback / metadata (encoded) ---
+http://127.0.0.1/
+http://127.1/
+http://0.0.0.0/
+http://localhost/
+http://[::1]/
+http://0000::1/
+http://2130706433/
+http://2852039166/
+http://017700000001/
+http://0x7f000001/
+http://0xA9.0xFE.0xA9.0xFE/
+http://0xA9FEA9FE/
+http://0251.0376.0251.0376/
+http://[::ffff:a9fe:a9fe]/
+http://[0:0:0:0:0:ffff:a9fe:a9fe]/
+http://[fd00:ec2::254]/
+http://127.0.0.1.nip.io/
+http://localtest.me/
+http://127.0.0.1.xip.io/
+
+# --- Domain allowlist bypass ---
+https://allowed.com.attacker.com/
+https://attacker.com/allowed.com/
+https://allowed.com%40attacker.com/
+https://allowed.com%252eattacker.com/
+https://attacker.com#allowed.com
+https://attacker.com?allowed.com
+https://allowed.com.attacker.com
+https://allowed-com.attacker.com
+https://allowedcom.attacker.com
+https://allowed.com\@attacker.com
+https://attacker.com\@allowed.com
+https://allowed.com%00.attacker.com
+https://allowed.com%0a.attacker.com
+https://allowed.com%09.attacker.com
+
+# --- Credential / parser confusion ---
+https://allowed.com:attacker.com
+https://allowed.com@attacker.com
+https://allowed.com%40attacker.com@attacker.com
+https://attacker.com%23allowed.com
+https://attacker.com%2f%2fallowed.com
+https://attacker.com/allowed.com
+https://attacker.com\\allowed.com
+https://attacker.com/..%2fallowed.com
+
+# --- Scheme smuggling ---
+file:///etc/passwd
+dict://127.0.0.1:6379/info
+gopher://127.0.0.1:6379/_INFO
+ldap://127.0.0.1/
+jar:http://attacker.com!/test
+ftp://127.0.0.1/
+tftp://127.0.0.1/
+
+# --- CORS Origin bypass patterns ---
+null
+https://attacker.com
+https://attacker.com.target.com
+https://target.com.attacker.com
+https://targetcom.attacker.com
+https://target.com%60.attacker.com
+https://target.com%00.attacker.com
+
+# --- Open redirect chaining (use with allowed domain) ---
+//attacker.com
+\/\/attacker.com
+/\attacker.com
+//attacker.com/%2f%2e%2e
+//attacker.com%00.target.com
+//attacker.com%09.target.com
+//attacker.com%0d%0a.target.com
+https:attacker.com
+https:/attacker.com
+https:///attacker.com
+https:\\\\attacker.com
+https://attacker.com\@target.com
+https://target.com\@attacker.com
+https://target.com%2f%2fattacker.com
+https://target.com/redirect?url=https://attacker.com
+
+# --- Hostname-only context (Host header / DNS rebinding prep) ---
+127.0.0.1
+localhost
+0
+0.0.0.0
+[::1]
+metadata.google.internal
+kubernetes.default.svc
+169.254.169.254

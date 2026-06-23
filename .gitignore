@@ -1,0 +1,47 @@
+# Secrets — NEVER commit
+.env
+.env.*
+*.env
+*.secret
+*.credential
+*.token
+*_key.txt
+*api_key*
+*secret*
+
+# Hunt artifacts with PII / targets
+sessions/
+hunt-memory/*.jsonl
+reports/*.md
+reports/*.json
+reports/*.html
+memory/*.jsonl
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+venv/
+.venv/
+*.egg-info/
+.pytest_cache/
+dist/
+build/
+
+# JS/Node
+node_modules/
+
+# Logs
+*.log
+
+# Keys/certs
+*.key
+*.pem
+*.p12
+
+# OS
+.DS_Store
+Thumbs.db
+
+# APK files (large binaries)
+*.apk

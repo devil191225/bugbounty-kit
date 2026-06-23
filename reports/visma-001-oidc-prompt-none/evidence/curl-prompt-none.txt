@@ -1,0 +1,61 @@
+# Evidence: prompt=none redirects to error page instead of redirect_uri
+# Date: 2026-06-09
+# Tester: ask92
+
+# Test 1: client_id=vismaonline (staging)
+
+REQUEST:
+  GET /connect/authorize?client_id=vismaonline&prompt=none&redirect_uri=https://www.vismaonline.com/&response_type=code&scope=openid&state=TESTSTATE123
+  Host: connect.identity.stagaws.visma.com
+
+ACTUAL RESPONSE:
+  HTTP/1.1 302 Found
+  Location: https://connect.identity.stagaws.visma.com/error?errorId=CfDJ8KIv3qOHS15GnSI...
+
+EXPECTED RESPONSE (OIDC Core §3.1.2.6):
+  HTTP/1.1 302 Found
+  Location: https://www.vismaonline.com/?error=login_required&state=TESTSTATE123
+
+# Test 2: client_id=dinero (staging)
+
+REQUEST:
+  GET /connect/authorize?client_id=dinero&prompt=none&redirect_uri=https://app.dinero.dk/&response_type=code&scope=openid&state=TESTSTATE123
+  Host: connect.identity.stagaws.visma.com
+
+ACTUAL RESPONSE:
+  HTTP/1.1 302 Found
+  Location: https://connect.identity.stagaws.visma.com/error?errorId=CfDJ8KIv3qOHS15GnSI...
+
+# Test 3: client_id=accountsettings (staging) 
+
+REQUEST:
+  GET /connect/authorize?client_id=accountsettings&prompt=none&redirect_uri=https://account.visma.com/&response_type=code&scope=openid&state=TESTSTATE123
+  Host: connect.identity.stagaws.visma.com
+
+ACTUAL RESPONSE:
+  HTTP/1.1 302 Found
+  Location: https://connect.identity.stagaws.visma.com/error?errorId=...
+
+# Test 4: Production (connect.visma.com)
+
+REQUEST:
+  GET /connect/authorize?client_id=vismaonline&prompt=none&redirect_uri=https://www.vismaonline.com/&response_type=code&scope=openid&state=TESTSTATE123
+  Host: connect.visma.com
+
+ACTUAL RESPONSE:
+  HTTP/1.1 302 Found
+  Location: https://connect.visma.com/error?errorId=...
+
+# Error page content 
+Title: Visma Connect
+Body:
+  "Ooops! Something went wrong while processing your request.
+   We advise you to close the browser and try again later.
+   In case the problem persists, please contact your customer support and forward this error-ID"
+   error-ID: d4f8eed2-d166-478b-aec7-0ad257b9f54d
+   Timestamp: 2026-06-09 21:10:59Z
+
+# Discovery document confirms prompt=none is advertised
+GET https://connect.identity.stagaws.visma.com/.well-known/openid-configuration
+Response includes:
+  "prompt_values_supported": ["none", "login", "consent", "select_account"]

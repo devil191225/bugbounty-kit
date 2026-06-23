@@ -1,0 +1,34 @@
+# gRPC / grpc-web path and port discovery seeds
+# Source: grpc-testing.md, OWASP API Security, HackTricks gRPC
+# Tier: Curated | Use with grpcurl, httpx -h2
+
+# --- Common ports (ffuf host scan / nmap) ---
+50051
+50052
+9090
+8443
+443
+
+# --- HTTP/2 path patterns (Host: target, path fuzz) ---
+/grpc.reflection.v1alpha.ServerReflection/ServerReflectionInfo
+/grpc.reflection.v1.ServerReflection/ServerReflectionInfo
+/grpc.health.v1.Health/Check
+/grpc.health.v1.Health/Watch
+
+# --- grpc-web proxy paths ---
+/grpc
+/grpc-web
+/api/grpc
+/v1/grpc
+/rpc
+/rpc/
+
+# --- Service path templates (replace package.Service/Method) ---
+# /{package}.{Service}/{Method}
+# Example patterns to brute after reflection:
+/UserService/GetUser
+/UserService/DeleteUser
+/AdminService/ListUsers
+/AuthService/Login
+/OrderService/GetOrder
+/PaymentService/Refund

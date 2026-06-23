@@ -1,0 +1,36 @@
+# Custom Nuclei templates for bug bounty hunting
+# Tier: Curated | Run: nuclei -t nuclei/custom/ -l urls.txt
+
+id: custom-graphql-introspection
+
+info:
+  name: GraphQL Introspection Enabled
+  author: bugbounty-kit
+  severity: info
+  description: Detects GraphQL introspection on common paths. Introspection alone is usually informational — chain for impact.
+  tags: graphql,introspection,api,misconfig
+  reference:
+    - https://owasp.org/API-Security/editions/2023/en/0xa1-broken-object-level-authorization/
+
+http:
+  - method: POST
+    path:
+      - "{{BaseURL}}/graphql"
+      - "{{BaseURL}}/api/graphql"
+      - "{{BaseURL}}/v1/graphql"
+      - "{{BaseURL}}/query"
+    headers:
+      Content-Type: application/json
+    body: '{"query":"{__schema{queryType{name}}}"}'
+
+    matchers-condition: and
+    matchers:
+      - type: word
+        words:
+          - "__schema"
+          - "queryType"
+        condition: and
+      - type: status
+        status:
+          - 200
+          - 400

